@@ -11,7 +11,7 @@ namespace _2016
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(Signals(@"Data\6.txt"));
+            Console.WriteLine(SSLProtocol(@"Data\7.txt"));
         }
 
 		private static int StreetGrid(string path)
@@ -217,5 +217,95 @@ namespace _2016
 			
 			return pass;
 		}
-  	}
+
+		private static int TLSProtocol(string path)
+		{
+			var count = 0;
+
+			foreach (string input in File.ReadAllLines(path)) 
+			{
+				var regex = new Regex(@"\[\w+?\]");
+
+				// strings not in square brackets
+				var non = regex.Replace(input, ".").Split('.');
+
+				var sqAbba = false;
+
+				// Search in sq brackets for abba
+				foreach (Match match in regex.Matches(input))
+				{
+					if (FindAbba(match.Value.Trim('[', ']')) && !sqAbba) sqAbba = true;
+				}
+
+				// If we found one it's invalid
+				if (sqAbba) continue;
+
+				// Search in the rest for abba
+				foreach (var str in non)
+				{
+					if (FindAbba(str))
+					{
+						count++;
+						break;
+					} 
+				}
+			}
+
+			return count;
+		}
+
+		private static int SSLProtocol(string path)
+		{
+			var count = 0;
+			
+			foreach (var str in File.ReadAllLines(path))
+			{
+				var regex = new Regex(@"\[\w+?\]");
+
+				// strings not in square brackets
+				var non = regex.Replace(str, ".").Split('.');
+
+				var bab = new List<string>();
+
+				// Search in sq brackets for bab
+				foreach (Match match in regex.Matches(str))
+				{
+					var arr = match.Value.ToCharArray();
+					for (var i = 0; i < arr.Length - 2; i++)
+					{
+						if (arr[i] == arr[i + 2] && arr[i] != arr[i + 1])
+						{
+							bab.Add(arr[i + 1].ToString() + arr[i].ToString() + arr[i + 1].ToString());
+						}
+					}
+				}
+
+				foreach (var s in non)
+				{
+					foreach (var b in bab)
+					{
+						if (s.Contains(b))
+						{
+							count++;
+							break;
+						}
+					}
+				}
+			}
+			return count;
+		}
+
+		private static bool FindAbba(string s)
+		{
+			var arr = s.ToCharArray();
+			for (var i = 0; i <= arr.Length - 4; i++)
+			{
+				if (arr[i] == arr[i + 3] && arr[i + 1] == arr[i + 2])
+				{
+					if (arr[i] != arr[i + 1]) return true;
+				}
+			}
+			return false;
+		}
+	}
 }

@@ -11,7 +11,7 @@ namespace _2016
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(ComplexHash("ugkcyxxp"));
+            Console.WriteLine(Signals(@"Data\6.txt"));
         }
 
 		private static int StreetGrid(string path)
@@ -203,6 +203,19 @@ namespace _2016
 				}
 			}
 			return string.Join("", pass);
+		}
+
+		private static string Signals(string path)
+		{
+			var words = File.ReadAllText(path).Split('\n');
+			var pass = "";
+			
+			for (var i = 0; i < words[0].Length - 1; i++)
+			{
+				pass += words.Select(x => x[i]).GroupBy(x => x).OrderBy(x => x.Count()).First().Key;
+			}
+			
+			return pass;
 		}
   	}
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace _2016
 {
@@ -10,7 +11,7 @@ namespace _2016
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(DecoyRooms(@"Data\4.txt"));
+            Console.WriteLine(ComplexHash("ugkcyxxp"));
         }
 
 		private static int StreetGrid(string path)
@@ -148,6 +149,60 @@ namespace _2016
 			}
 
 			return total;
+		}
+
+		private static string MD5Hash(string doorId)
+		{
+			var pass = new StringBuilder();
+			using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+			{
+				var i = 0;
+				while (pass.Length < 8)
+				{
+					byte[] input = System.Text.Encoding.ASCII.GetBytes(doorId + "" + i);
+					byte[] hashed = md5.ComputeHash(input);
+
+					var output = string.Join("", hashed.Select(x => x.ToString("x2")));
+
+					if (output.Substring(0, 5) == "00000")
+					{
+						pass.Append(output.Substring(5, 1));
+					}
+					i++;
+				}
+			}
+			return pass.ToString();
+		}
+
+		private static string ComplexHash(string doorId)
+		{
+			var pass = new string[8] {"-", "-", "-", "-", "-", "-", "-" ,"-"};
+			var counter = 0;
+			using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+			{
+				var i = 0;
+				while (counter < 8)
+				{
+					byte[] input = System.Text.Encoding.ASCII.GetBytes(doorId + "" + i);
+					byte[] hashed = md5.ComputeHash(input);
+
+					var output = string.Join("", hashed.Select(x => x.ToString("x2")));
+
+					if (output.Substring(0, 5) == "00000" && char.IsDigit(output[5]))
+					{
+						Console.WriteLine(output);
+						var index = int.Parse(output.Substring(5, 1));
+						if (index < 8 && pass[index] == "-")
+						{
+							pass[index] = output.Substring(6, 1);
+							Console.WriteLine(string.Join("", pass));
+							counter++;
+						}
+					}
+					i++;
+				}
+			}
+			return string.Join("", pass);
 		}
   	}
 }

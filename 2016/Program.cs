@@ -10,8 +10,17 @@ namespace _2016
     class Program
     {
         public static void Main(string[] args)
-        {
-            Console.WriteLine(SSLProtocol(@"Data\7.txt"));
+        {	
+			var text = File.ReadAllText(@"Data\9.txt");
+			var dc = Decompress2(text);
+
+			while (dc.Contains("("))
+			{
+				dc = Decompress2(dc);
+				Console.WriteLine(dc.Length);
+			}
+
+			Console.WriteLine(dc.Length);
         }
 
 		private static int StreetGrid(string path)
@@ -295,6 +304,141 @@ namespace _2016
 			return count;
 		}
 
+		private static int ScreenCode(string path)
+		{
+			var screen = new bool[6, 50];
+			
+			foreach (var inst in File.ReadAllLines(path))
+			{
+				if (inst.Substring(0, 4) == "rect")
+				{
+					var dims = inst.Split(' ')[1].Split('x');
+					var x = int.Parse(dims[0]);
+					var y = int.Parse(dims[1]);
+					
+					for (var j = 0; j < y; j++)
+					{
+						for (var i = 0; i < x; i++)
+						{
+							screen[j, i] = true;
+						}
+					}
+				}
+				else
+				{
+					var parts = inst.Split(' ');
+					var ind = int.Parse(parts[2].Split('=')[1]);
+					var dist = int.Parse(parts[4]);
+
+					if (parts[1] == "row")
+					{
+						screen = Rotate(screen, false, ind, dist);
+					}
+					else
+					{
+						screen = Rotate(screen, true, ind, dist);
+					}
+				}
+			}
+
+			var count = 0;
+
+			// Display the screen output
+			for (var j = 0; j < screen.GetLength(0); j++)
+			{
+				for (var i = 0; i < screen.GetLength(1); i++)
+				{
+					if (screen[j, i]) 
+					{
+						Console.Write("1 ");
+						count++;
+					}
+					else Console.Write("0 ");
+				}
+				Console.WriteLine();
+			}
+
+			return count;
+		}
+
+		private static string Decompress(string path)
+		{
+			var text = File.ReadAllText(path);
+			var dc = new List<string>();
+
+			for (int ptr = 0; ptr < text.Length; ptr++)
+			{
+				if (text[ptr] != '(') 
+				{
+					dc.Add(text[ptr].ToString());
+				}
+				else // current is an opening bracket
+				{
+					var temp = ptr;
+					while (text[temp] != ')') temp++;
+
+					// parse the instruction
+					var inst = text.Substring(ptr, temp - ptr + 1).Trim('(', ')').Split('x').Select(int.Parse).ToArray();
+
+					// set the pointer to the end of the instruction
+					ptr = temp + 1;
+
+					// Add the text to decompress
+					for (var j = 0; j < inst[1]; j++)
+					{
+						dc.Add(text.Substring(ptr, inst[0]));
+					}
+
+					// Set the pointer to the end of the repeated characters
+					ptr += inst[0];
+
+					// Handle for loop
+					ptr--;
+				}
+			}
+
+			return string.Join("", dc);
+		}
+
+		private static string Decompress2(string text)
+		{
+			var dc = new List<string>();
+
+			// While the string is not empty
+			while (!string.IsNullOrEmpty(text))
+			{
+				if (text[0] != '(')
+				{
+					dc.Add(text[0].ToString());
+					text = text.Remove(0, 1);
+				}
+				else // opening bracket
+				{
+					var ind = 0;
+					while (text[ind] != ')') ind++;
+
+					// parse instruction
+					var inst = text.Substring(0, ind + 1).Trim('(', ')').Split('x').Select(int.Parse).ToArray();
+
+					// remove the instruction from the start
+					text = text.Remove(0, ind + 1);
+					
+					// add the repeated characters x times
+					for (var i = 0; i < inst[1]; i++)
+					{
+						dc.Add(text.Substring(0, inst[0]));
+					}
+
+					// remove the characters that were just added
+					text = text.Remove(0, inst[0]);
+				}
+			}
+
+			var res = string.Join("", dc);
+			//Console.WriteLine(res);
+			return res;
+		}
+
 		private static bool FindAbba(string s)
 		{
 			var arr = s.ToCharArray();
@@ -306,6 +450,37 @@ namespace _2016
 				}
 			}
 			return false;
+		}
+
+		private static bool[,] Rotate(bool[,] arr, bool vert, int ind, int dist)
+		{
+			var width = arr.GetLength(1);
+			var height = arr.GetLength(0);
+			if (vert)
+			{
+				for (var n = 0; n < dist; n++) 
+				{
+					bool last = arr[height - 1, ind];
+					for (var i = height - 1; i > 0; i--)
+					{
+						arr[i, ind] = arr[i - 1, ind];
+					}
+					arr[0, ind] = last;
+				}
+			}
+			else
+			{
+				for (var n = 0; n < dist; n++)
+				{
+					bool last = arr[ind, width - 1];
+					for (var i = width - 1; i > 0; i--)
+					{
+						arr[ind, i] = arr[ind, i - 1];
+					}
+					arr[ind, 0] = last;
+				}
+			}
+			return arr;
 		}
 	}
 }

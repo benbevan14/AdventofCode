@@ -5,14 +5,14 @@ using System.Collections.Generic;
 
 namespace _2017
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Console.WriteLine(SpiralSteps());
+            Console.WriteLine(EscapeList(@"data/5.txt"));
         }
 
-		static int AddDigits(string path)
+		private static int AddDigits(string path)
 		{
 			string s = File.ReadAllText(path);
 			int step = s.Length / 2;
@@ -28,7 +28,7 @@ namespace _2017
 			return sum;
 		}
 
-		static int Checksum(string path)
+		private static int Checksum(string path)
 		{
 			int sum = 0;
 			foreach (string s in File.ReadAllLines(path))
@@ -39,7 +39,7 @@ namespace _2017
 			return sum;
 		}
 
-		static int ChecksumDivisible(string path)
+		private static int ChecksumDivisible(string path)
 		{
 			int sum = 0;
 			foreach (string s in File.ReadAllLines(path))
@@ -68,9 +68,45 @@ namespace _2017
 			return sum;
 		}
 
-		static int SpiralSteps()
+		private static int ValidPassphrases(string path)
 		{
-			
+			var count = 0;
+
+			foreach (var words in File.ReadAllLines(path).Select(x => x.Split(' ')))
+			{
+				var map = new Dictionary<string, int>();
+
+				foreach (var word in words)
+				{
+					var sorted = String.Concat(word.OrderBy(c => c));
+					map.TryGetValue(sorted, out var num);
+					map[sorted] = num + 1;
+				}
+
+				if (!map.Values.Any(p => p > 1)) count++;
+			}
+
+			return count;
+		}
+
+		private static int EscapeList(string path)
+		{
+			var nums = File.ReadAllLines(path).Select(int.Parse).ToArray();
+
+			var steps = 0;
+			var pos = 0;
+
+			while (pos < nums.Length)
+			{
+				var change = nums[pos] > 2 ? -1 : 1;
+				var temp = pos;
+				pos += nums[pos];
+				nums[temp] += change;
+				steps++;
+			}
+
+			//Console.WriteLine(string.Join(" ", nums));
+			return steps;
 		}
     }
 }

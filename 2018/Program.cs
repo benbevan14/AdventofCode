@@ -114,7 +114,10 @@ namespace _2018
 			return count;
 		}
 
-
+		private static int AlchemicalReduction(string path)
+		{
+			return 0;
+		}
 
 		// Tools ================================================================
 

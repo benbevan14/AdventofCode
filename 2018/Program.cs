@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(EfficientReduction(@"data\5.txt"));
+            Console.WriteLine(FabricSize(@"data\test.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -114,50 +114,7 @@ namespace _2018
 			return count;
 		}
 
-		private static int AlchemicalReduction(string input)
-		{
-			//var input = File.ReadAllText(path);
-
-			var ptr = 0;
-
-			while (ptr < input.Length - 1)
-			{
-				if (char.ToLower(input[ptr]) == char.ToLower(input[ptr + 1]) && input[ptr] != input[ptr + 1])
-				{
-					input = input.Remove(ptr, 2);
-					ptr--;
-					if (ptr < 0) ptr = 0;
-					// Console.WriteLine(input);
-				}
-				else
-				{
-					ptr++;
-				}
-			}
-
-			return input.Length;
-		}
-
-		private static int EfficientReduction(string path)
-		{
-			var input = File.ReadAllText(path);
-			var dict = new Dictionary<char, int>();
-
-			var alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-			foreach (var c in alphabet)
-			{
-				var removed = input.Replace(c.ToString(), "").Replace(char.ToUpper(c).ToString(), "");
-				dict[c] = AlchemicalReduction(removed);
-			}
-
-			foreach (var p in dict)
-			{
-				Console.WriteLine(p.Key + ": " + p.Value);
-			}
-
-			return dict.OrderBy(p => p.Value).First().Value;
-		}
+		
 
 		// Tools ================================================================
 

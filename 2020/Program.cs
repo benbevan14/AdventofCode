@@ -6,14 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace _2020
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-			Console.WriteLine(UniqueLetters(@"data\test.txt"));
+			Console.WriteLine(BinaryBoarding(@"data\5.txt"));
         }
 
-		static int FindSum(string path)
+		private static int FindSum(string path)
 		{
 			List<(int, int)> pairs = new List<(int, int)>();
 			HashSet<int> hashSet = new HashSet<int>();
@@ -34,7 +34,7 @@ namespace _2020
 			return pairs[0].Item1 * pairs[0].Item2;
 		}
     
-		static void ThreeSum(string path)
+		private static void ThreeSum(string path)
 		{
 			int[] nums = File.ReadAllLines(path).Select(x => int.Parse(x)).ToArray();
 
@@ -54,7 +54,7 @@ namespace _2020
 			}
 		}
 	
-		static int CheckPasswords(string path)
+		private static int CheckPasswords(string path)
 		{
 			int counter = 0;
 			foreach (string line in File.ReadAllLines(path))
@@ -76,7 +76,7 @@ namespace _2020
 			return counter;
 		}
 	
-		static int CheckMorePasswords(string path)
+		private static int CheckMorePasswords(string path)
 		{
 			int counter = 0;
 			foreach (string line in File.ReadAllLines(path))
@@ -97,7 +97,7 @@ namespace _2020
 			return counter;
 		}
 	
-		static int TobogganRun(string path, int width)
+		private static int TobogganRun(string path, int width)
 		{
 			int counter = 0;
 			int xPos = 0;
@@ -116,7 +116,7 @@ namespace _2020
 			return counter;
 		}
 	
-		static int SteeperRun(string path)
+		private static int SteeperRun(string path)
 		{
 			int counter = 0;
 			int xPos = 0;
@@ -143,7 +143,7 @@ namespace _2020
 			return counter;
 		}
 	
-		static int PassportCheck(string path)
+		private static int PassportCheck(string path)
 		{
 			int numValid = 0;
 			string text = File.ReadAllText(path);
@@ -196,7 +196,49 @@ namespace _2020
 			return numValid;
 		}
 
-		static int UniqueLetters(string path)
+		private static int BinaryBoarding(string path)
+		{
+			var highest = 0;
+
+			foreach (var str in File.ReadAllLines(path))
+			{
+				var row = 0;
+				var col = 0;
+
+				var low = 0;
+				var high = 127;
+				var range = high - low + 1;
+
+				for (var i = 0; i < 7; i++)
+				{
+					range /= 2;
+					if (str[i] == 'F') high = low + range - 1;
+					else if (str[i] == 'B') low += range;
+				}
+
+				row = low;
+
+				low = 0;
+				high = 7;
+				range = high - low + 1;
+				for (var i = 0; i < 3; i++)
+				{
+					range /= 2;
+					if (str[i + 7] == 'L') high = low + range - 1;
+					else if (str[i + 7] == 'R') low += range;
+				}
+
+				col = low;
+
+				var id = row * 8 + col;
+
+				if (id > highest) highest = id;
+			}
+
+			return highest;
+		}
+
+		private static int UniqueLetters(string path)
 		{
 			List<string> lines = new List<string>();
 			foreach (string s in File.ReadAllText(path).Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries))

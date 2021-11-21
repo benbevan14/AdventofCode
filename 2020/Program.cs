@@ -198,7 +198,7 @@ namespace _2020
 
 		private static int BinaryBoarding(string path)
 		{
-			var highest = 0;
+			var ids = new List<int>();
 
 			foreach (var str in File.ReadAllLines(path))
 			{
@@ -232,10 +232,15 @@ namespace _2020
 
 				var id = row * 8 + col;
 
-				if (id > highest) highest = id;
+				ids.Add(id);
 			}
 
-			return highest;
+			for (var i = 0; i <= 980; i++)
+			{
+				if (!ids.Contains(i)) Console.WriteLine(i);
+			}
+			
+			return 0;
 		}
 
 		private static int UniqueLetters(string path)

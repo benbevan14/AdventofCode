@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 
 namespace _2020
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-			Console.WriteLine(UniqueLetters(@"data\6.txt"));
-        }
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			Console.WriteLine(CorruptedInstruction(@"data\8.txt"));
+		}
 
 		private static int FindSum(string path)
 		{
@@ -20,7 +20,7 @@ namespace _2020
 			foreach (int n in File.ReadAllLines(path).Select(x => int.Parse(x)))
 			{
 				int required = 2020 - n;
-				if (hashSet.Contains(required)) 
+				if (hashSet.Contains(required))
 				{
 					pairs.Add((required, n));
 				}
@@ -33,7 +33,7 @@ namespace _2020
 
 			return pairs[0].Item1 * pairs[0].Item2;
 		}
-    
+
 		private static void ThreeSum(string path)
 		{
 			int[] nums = File.ReadAllLines(path).Select(x => int.Parse(x)).ToArray();
@@ -53,7 +53,7 @@ namespace _2020
 				}
 			}
 		}
-	
+
 		private static int CheckPasswords(string path)
 		{
 			int counter = 0;
@@ -65,7 +65,7 @@ namespace _2020
 				string password = info[2];
 				string removed = password.Replace(letter, "");
 				int diff = password.Length - removed.Length;
-				if (diff >= nums[0] && diff <= nums[1]) 
+				if (diff >= nums[0] && diff <= nums[1])
 				{
 					counter++;
 				}
@@ -75,7 +75,7 @@ namespace _2020
 
 			return counter;
 		}
-	
+
 		private static int CheckMorePasswords(string path)
 		{
 			int counter = 0;
@@ -96,7 +96,7 @@ namespace _2020
 			}
 			return counter;
 		}
-	
+
 		private static int TobogganRun(string path, int width)
 		{
 			int counter = 0;
@@ -108,14 +108,14 @@ namespace _2020
 					counter++;
 				}
 				xPos += width;
-				if (xPos >= line.Length) 
+				if (xPos >= line.Length)
 				{
 					xPos -= line.Length;
 				}
 			}
 			return counter;
 		}
-	
+
 		private static int SteeperRun(string path)
 		{
 			int counter = 0;
@@ -134,7 +134,7 @@ namespace _2020
 					counter++;
 				}
 				xPos++;
-				if (xPos >= line.Length) 
+				if (xPos >= line.Length)
 				{
 					xPos -= line.Length;
 				}
@@ -142,12 +142,12 @@ namespace _2020
 			}
 			return counter;
 		}
-	
+
 		private static int PassportCheck(string path)
 		{
 			int numValid = 0;
 			string text = File.ReadAllText(path);
-			string[] passports = text.Split(new string[] {"\r\n\r\n"}, StringSplitOptions.RemoveEmptyEntries);
+			string[] passports = text.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
 			foreach (string s in passports)
 			{
@@ -177,7 +177,7 @@ namespace _2020
 					string hgt = res.Groups["hgt"].Value.Substring(4);
 					string type = Regex.Replace(hgt, @"\d", "");
 					int number = int.Parse(Regex.Replace(hgt, @"[a-zA-Z]", ""));
-					
+
 					if (type == "cm")
 					{
 						if (number < 150 || number > 193) continue;
@@ -239,7 +239,7 @@ namespace _2020
 			{
 				if (!ids.Contains(i)) Console.WriteLine(i);
 			}
-			
+
 			return 0;
 		}
 
@@ -259,6 +259,71 @@ namespace _2020
 				total += dict.Values.Where(v => v == lines).Count();
 			}
 			return total;
+		}
+
+		private static int InfiniteLoop(string[] codes)
+		{
+			var acc = 0;
+			var visited = new List<int>();
+			var ptr = 0;
+
+			while (true)
+			{
+				// If we've already been to this location the program will loop infinitely, so return 0
+				if (visited.Contains(ptr)) return 0;
+
+				visited.Add(ptr);
+				var temp = codes[ptr].Split(" ");
+				var inst = temp[0];
+				var arg = int.Parse(temp[1]);
+
+				switch (inst)
+				{
+					case "acc":
+						acc += arg;
+						ptr++;
+						break;
+					case "jmp":
+						ptr += arg;
+						break;
+					case "nop":
+						ptr++;
+						break;
+				}
+
+				// If the pointer is past the end then we've terminated, so return the accumulator value
+				if (ptr >= codes.Length) return acc;
+			}
+		}
+
+		private static int CorruptedInstruction(string path)
+		{
+			var codes = File.ReadAllLines(path);
+			for (var i = 0; i < codes.Length; i++)
+			{
+				var newInst = "";
+				if (codes[i].Substring(0, 3) == "nop")
+				{
+					newInst = "jmp" + codes[i].Substring(3);
+				}
+				else if (codes[i].Substring(0, 3) == "jmp")
+				{
+					newInst = "nop" + codes[i].Substring(3);
+				}
+
+				if (newInst != "")
+				{
+					var newCodes = (string[])codes.Clone();
+					newCodes[i] = newInst;
+
+					var output = InfiniteLoop(newCodes);
+					if (output != 0)
+					{
+						return output;
+					}
+				}
+			}
+			return 0;
 		}
 
 		

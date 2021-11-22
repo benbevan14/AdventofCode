@@ -10,7 +10,7 @@ namespace _2020
     {
         public static void Main(string[] args)
         {
-			Console.WriteLine(BinaryBoarding(@"data\5.txt"));
+			Console.WriteLine(UniqueLetters(@"data\6.txt"));
         }
 
 		private static int FindSum(string path)
@@ -245,12 +245,22 @@ namespace _2020
 
 		private static int UniqueLetters(string path)
 		{
-			List<string> lines = new List<string>();
-			foreach (string s in File.ReadAllText(path).Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries))
+			var total = 0;
+			foreach (string s in File.ReadAllText(path).Split(new string[] { "\r\n\r\n" }, System.StringSplitOptions.RemoveEmptyEntries))
 			{
-				Console.WriteLine(s + ":");
+				var str = s.Replace("\r\n", "");
+				var lines = (s.Length - str.Length + 2) / 2;
+				var dict = new Dictionary<char, int>();
+				foreach (char c in str)
+				{
+					dict.TryGetValue(c, out var count);
+					dict[c] = count + 1;
+				}
+				total += dict.Values.Where(v => v == lines).Count();
 			}
-			return 0;
+			return total;
 		}
+
+		
 	}
 }

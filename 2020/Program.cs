@@ -10,7 +10,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(CorruptedInstruction(@"data\8.txt"));
+			Console.WriteLine(EncodingError(@"data\9.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -326,6 +326,32 @@ namespace _2020
 			return 0;
 		}
 
-		
+		private static long EncodingError(string path)
+		{
+			var nums = File.ReadAllLines(path).Select(long.Parse).ToArray();
+			var len = 25;
+
+			for (var i = len; i < nums.Length; i++)
+			{
+				var prev = nums.Skip(i - len).Take(len).ToArray();
+				if (!TwoSum(prev, nums[i])) return nums[i];
+			}
+			return 0;
+		}
+
+		// Tools
+		private static bool TwoSum(long[] arr, long target)
+		{
+			var hs = new HashSet<long>();
+
+			for (var i = 0; i < arr.Length; i++)
+			{
+				var diff = target - arr[i];
+				if (hs.Contains(diff)) return true;
+				hs.Add(arr[i]);
+			}
+
+			return false;
+		}
 	}
 }

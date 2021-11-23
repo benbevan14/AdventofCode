@@ -10,7 +10,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(EncodingError(@"data\9.txt"));
+			Console.WriteLine(SubArraySum(@"data\9.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -336,6 +336,33 @@ namespace _2020
 				var prev = nums.Skip(i - len).Take(len).ToArray();
 				if (!TwoSum(prev, nums[i])) return nums[i];
 			}
+			return 0;
+		}
+
+		private static long SubArraySum(string path)
+		{
+			var input = File.ReadAllLines(path).Select(long.Parse).ToArray();
+			var target = 731031916;
+			var curr = input[0];
+			var start = 0;
+
+			for (var i = 1; i <= input.Length; i++)
+			{
+				while (curr > target && start < i - 1)
+				{
+					curr -= input[start];
+					start++;
+				}
+
+				if (curr == target)
+				{
+					var range = input.Skip(start).Take(i - 1 - start);
+					return range.Min() + range.Max();
+				}
+
+				if (i < input.Length) curr += input[i];
+			}
+
 			return 0;
 		}
 

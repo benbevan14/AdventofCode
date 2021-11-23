@@ -10,7 +10,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(AdapterCombinations(@"data\10.txt"));
+			Console.WriteLine(SeatingSystem(@"data\test.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -422,6 +422,16 @@ namespace _2020
 			return ways[adapters.Last()];
 		}
 		
+		private static int SeatingSystem(string path)
+		{
+			char[,] grid = ReadGrid(path);
+
+			
+			DisplayGrid(grid);
+
+			return 0;
+		}
+		
 		// Tools
 		private static bool TwoSum(long[] arr, long target)
 		{
@@ -435,6 +445,35 @@ namespace _2020
 			}
 
 			return false;
+		}
+
+		private static char[,] ReadGrid(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var size = input[0].Length;
+			var grid = new char[size, size];
+
+			for (var row = 0; row < size; row++)
+			{
+				for (var col = 0; col < size; col++)
+				{
+					grid[row, col] = input[row][col];
+				}
+			}
+
+			return grid;
+		}
+
+		private static void DisplayGrid(char[,] grid)
+		{
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					Console.Write(grid[row, col]);
+				}
+				Console.WriteLine();
+			}
 		}
 	}
 }

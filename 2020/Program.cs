@@ -10,7 +10,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(SubArraySum(@"data\9.txt"));
+			Console.WriteLine(AdapterCombinations(@"data\10.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -366,6 +366,62 @@ namespace _2020
 			return 0;
 		}
 
+		private static int AdapterPath(string path)
+		{
+			var adapters = File.ReadAllLines(path).Select(int.Parse).OrderBy(x => x).ToArray();
+			var dict = new Dictionary<int, int>();
+			var jolt = 0;
+			var device = adapters.Max() + 3;
+			
+			// Do stuff
+			for (var i = 0; i < adapters.Length; i++)
+			{
+				var newJolt = adapters[i];
+				dict.TryGetValue(newJolt - jolt, out var count);
+				dict[newJolt - jolt] = count + 1;
+				jolt = newJolt;
+			}
+
+			dict.TryGetValue(device - jolt, out var c);
+			dict[device - jolt] = c + 1;
+
+			return dict[1] * dict[3];
+		}
+
+		private static long AdapterCombinations(string path)
+		{
+			var adapters = File.ReadAllLines(path).Select(long.Parse).OrderBy(x => x).ToArray();
+			// Keep track of number of ways we can approach this adapter
+			var ways = new Dictionary<long, long>();
+			ways[0] = 1;
+			
+			// Find the number of one step ways you can get to each adapter
+			for (var i = 1; i < adapters.Length; i++)
+			{
+				var current = adapters[i];
+				var num = 0;
+				for (var j = 1; j <= 3; j++)
+				{
+					if (adapters.Contains(current - j)) num++;
+				}
+				ways[current] = num;
+
+				// Account for the number of ways to get to previous adapters
+				for (var j = 1; j <= num; j++)
+				{
+					ways[adapters[i]] += ways[adapters[i - j]] - 1;
+				}
+			}
+
+			// Print out the number of one step ways to get to each value
+			foreach (var p in ways)
+			{
+				Console.WriteLine(p.Key + ": " + p.Value);
+			}
+
+			return ways[adapters.Last()];
+		}
+		
 		// Tools
 		private static bool TwoSum(long[] arr, long target)
 		{

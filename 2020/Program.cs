@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace _2020
 {
@@ -10,7 +11,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(SeatingSystem(@"data\test.txt"));
+			Console.WriteLine(SeatingSystem(@"data\11.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -426,10 +427,21 @@ namespace _2020
 		{
 			char[,] grid = ReadGrid(path);
 
-			
-			DisplayGrid(grid);
+			//DisplayGrid(grid);
 
-			return 0;
+			var prev = "";
+
+			// Iterate
+			while (GridToString(grid) != prev)
+			{
+				prev = GridToString(grid);
+				grid = IterateGrid(grid);
+				
+				//DisplayGrid(grid);
+				//Console.WriteLine();
+			}
+
+			return GridToString(grid).Count(c => c == '#');
 		}
 		
 		// Tools
@@ -474,6 +486,61 @@ namespace _2020
 				}
 				Console.WriteLine();
 			}
+		}
+
+		private static string GridToString(char[,] grid)
+		{
+			var sb = new StringBuilder();
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					sb.Append(grid[row, col]);
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		private static char[,] IterateGrid(char[,] grid)
+		{
+			var newGrid = new char[grid.GetLength(0), grid.GetLength(1)];
+
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					// Only check seats
+					if (grid[row, col] != '.')
+					{
+						var occupied = 0;
+						// check surrounding squares
+						for (var dx = -1; dx <= 1; dx++)
+						{
+							for (var dy = -1; dy <= 1; dy++)
+							{
+								// Check the neighbouring coordinate is in the grid
+								if (col + dx >= 0 && col + dx < grid.GetLength(1) && row + dy >= 0 && row + dy < grid.GetLength(0))
+								{
+									// Increment if occupied
+									if (grid[row + dy, col + dx] == '#') occupied++;
+								}
+							}
+						}
+
+						// If the seat is empty, check how many surrounding
+						if (grid[row, col] == 'L' && occupied == 0) newGrid[row, col] = '#';
+						else if (grid[row, col] == '#' && occupied > 4) newGrid[row, col] = 'L';
+						else newGrid[row, col] = grid[row, col];
+					}
+					else
+					{
+						newGrid[row, col] = grid[row, col];
+					}
+				}
+			}
+
+			return newGrid;
 		}
 	}
 }

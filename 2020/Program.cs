@@ -428,6 +428,7 @@ namespace _2020
 			char[,] grid = ReadGrid(path);
 
 			//DisplayGrid(grid);
+			//Console.WriteLine();
 
 			var prev = "";
 
@@ -435,7 +436,7 @@ namespace _2020
 			while (GridToString(grid) != prev)
 			{
 				prev = GridToString(grid);
-				grid = IterateGrid(grid);
+				grid = IterateGrid2(grid);
 				
 				//DisplayGrid(grid);
 				//Console.WriteLine();
@@ -482,7 +483,7 @@ namespace _2020
 			{
 				for (var col = 0; col < grid.GetLength(1); col++)
 				{
-					Console.Write(grid[row, col]);
+					Console.Write(grid[row, col] + " ");
 				}
 				Console.WriteLine();
 			}
@@ -541,6 +542,63 @@ namespace _2020
 			}
 
 			return newGrid;
+		}
+
+		private static char[,] IterateGrid2(char[,] grid)
+		{
+			var newGrid = new char[grid.GetLength(0), grid.GetLength(1)];
+
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					// Only check seats
+					if (grid[row, col] != '.')
+					{
+						var occupied = 0;
+						// check surrounding squares
+						for (var dx = -1; dx <= 1; dx++)
+						{
+							for (var dy = -1; dy <= 1; dy++)
+							{
+								// Skip when not going in any direction
+								if (dx == 0 && dy == 0) continue;
+
+								// Check if there is an occupied seat in each direction
+								if (SearchInDirection(grid, col, row, dx, dy)) occupied++;
+							}
+						}
+
+						// If the seat is empty, check how many surrounding
+						if (grid[row, col] == 'L' && occupied == 0) newGrid[row, col] = '#';
+						else if (grid[row, col] == '#' && occupied > 4) newGrid[row, col] = 'L';
+						else newGrid[row, col] = grid[row, col];
+					}
+					else
+					{
+						newGrid[row, col] = grid[row, col];
+					}
+				}
+			}
+
+			return newGrid;
+		}
+
+		private static bool SearchInDirection(char[,] grid, int row, int col, int dx, int dy)
+		{
+			var xPos = col + dx;
+			var yPos = row + dy;
+
+			while (xPos >= 0 && xPos < grid.GetLength(1) && yPos >= 0 && yPos < grid.GetLength(0))
+			{
+				if (grid[xPos, yPos] == '#') return true;
+				else if (grid[xPos, yPos] == 'L') return false;
+
+				xPos += dx;
+				yPos += dy;
+			}
+
+			return false;
 		}
 	}
 }

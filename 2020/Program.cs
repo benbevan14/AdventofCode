@@ -11,7 +11,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(WaypointRainRisk(@"data\12.txt"));
+			Console.WriteLine(BusTime(@"data\13.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -565,6 +565,26 @@ namespace _2020
 			return Math.Abs(pos[0]) + Math.Abs(pos[1]);
 		}
 
+		private static int BusTime(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var early = int.Parse(input[0]);
+			var ids = input[1].Split(',').Where(x => x != "x").Select(int.Parse).ToArray();
+
+			var earliest = new Dictionary<int, int>();
+
+			foreach (var id in ids)
+			{
+				var curr = id;
+				while (curr < early) curr += id;
+				earliest[id] = curr;
+			}
+			
+			var bus = earliest.OrderBy(x => x.Value).First();
+
+			return (bus.Value - early) * bus.Key;
+		}
+		
 		// Tools
 		private static bool TwoSum(long[] arr, long target)
 		{

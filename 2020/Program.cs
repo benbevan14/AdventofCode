@@ -11,7 +11,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(RainRisk(@"data\12.txt"));
+			Console.WriteLine(WaypointRainRisk(@"data\12.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -505,6 +505,64 @@ namespace _2020
 			}
 
 			return Math.Abs(xPos) + Math.Abs(yPos);
+		}
+
+		private static int WaypointRainRisk(string path)
+		{
+			var pos = new int[] { 0, 0 };
+			var waypoint = new int[] { 10, 1 };
+
+			Console.WriteLine($"Current position: {pos[0]}, {pos[1]}");
+			Console.WriteLine($"Current waypoint position: {waypoint[0]}, {waypoint[1]}");
+
+			foreach (var step in File.ReadAllLines(path))
+			{
+				Console.WriteLine(step);
+				var inst = step[0];
+				var mag = int.Parse(step.Substring(1));
+
+				switch (inst)
+				{
+					case 'N':
+						waypoint[1] += mag;
+						break;
+					case 'E':
+						waypoint[0] += mag;
+						break;
+					case 'S':
+						waypoint[1] -= mag;
+						break;
+					case 'W':
+						waypoint[0] -= mag;
+						break;
+					case 'R':
+						for (var i = 0; i < mag / 90; i++)
+						{
+							var temp = -waypoint[0];
+							waypoint[0] = waypoint[1];
+							waypoint[1] = temp;
+						}
+						break;
+					case 'L':
+						mag = 360 - mag;
+						for (var i = 0; i < mag / 90; i++)
+						{
+							var temp = -waypoint[0];
+							waypoint[0] = waypoint[1];
+							waypoint[1] = temp;
+						}
+						break;
+					case 'F':
+						pos[0] += mag * waypoint[0];
+						pos[1] += mag * waypoint[1];
+						break;
+				}
+
+				Console.WriteLine($"Current position: {pos[0]}, {pos[1]}");
+				Console.WriteLine($"Current waypoint position: {waypoint[0]}, {waypoint[1]}\n");
+			}
+
+			return Math.Abs(pos[0]) + Math.Abs(pos[1]);
 		}
 
 		// Tools

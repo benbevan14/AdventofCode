@@ -11,7 +11,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(SeatingSystem(@"data\11.txt"));
+			Console.WriteLine(RainRisk(@"data\12.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -373,7 +373,7 @@ namespace _2020
 			var dict = new Dictionary<int, int>();
 			var jolt = 0;
 			var device = adapters.Max() + 3;
-			
+
 			// Do stuff
 			for (var i = 0; i < adapters.Length; i++)
 			{
@@ -395,7 +395,7 @@ namespace _2020
 			// Keep track of number of ways we can approach this adapter
 			var ways = new Dictionary<long, long>();
 			ways[0] = 1;
-			
+
 			// Find the number of one step ways you can get to each adapter
 			for (var i = 1; i < adapters.Length; i++)
 			{
@@ -422,7 +422,7 @@ namespace _2020
 
 			return ways[adapters.Last()];
 		}
-		
+
 		private static int SeatingSystem(string path)
 		{
 			char[,] grid = ReadGrid(path);
@@ -437,14 +437,76 @@ namespace _2020
 			{
 				prev = GridToString(grid);
 				grid = IterateGrid2(grid);
-				
+
 				//DisplayGrid(grid);
 				//Console.WriteLine();
 			}
 
 			return GridToString(grid).Count(c => c == '#');
 		}
-		
+
+		private static int RainRisk(string path)
+		{
+			var dir = 1;
+			var xPos = 0;
+			var yPos = 0;
+
+			var facings = new int[4][] { new int[] { 0, 1 }, new int[] { 1, 0 }, new int[] { 0, -1 }, new int[] { -1, 0 } };
+
+			var d = facings[dir];
+
+			Console.WriteLine($"Current position: {xPos}, {yPos}, facing {dir}");
+
+			foreach (var step in File.ReadAllLines(path))
+			{
+				Console.WriteLine(step);
+				var inst = step[0];
+				var mag = int.Parse(step.Substring(1));
+
+				switch (inst)
+				{
+					case 'N':
+						d = facings[0];
+						break;
+					case 'E':
+						d = facings[1];
+						break;
+					case 'S':
+						d = facings[2];
+						break;
+					case 'W':
+						d = facings[3];
+						break;
+					case 'L':
+						dir -= mag / 90;
+						if (dir < 0) dir += 4;
+						// set dx and dy based on new heading
+						d = facings[dir];
+						break;
+					case 'R':
+						dir += mag / 90;
+						if (dir > 3) dir -= 4;
+						// set dx and dy based on new heading
+						d = facings[dir];
+						break;
+					case 'F':
+						d = facings[dir];
+						break;
+				}
+
+				// Move
+				if (inst != 'L' && inst != 'R')
+				{
+					xPos += mag * d[0];
+					yPos += mag * d[1];
+				}
+
+				Console.WriteLine($"Current position: {xPos}, {yPos}, facing {dir}");
+			}
+
+			return Math.Abs(xPos) + Math.Abs(yPos);
+		}
+
 		// Tools
 		private static bool TwoSum(long[] arr, long target)
 		{

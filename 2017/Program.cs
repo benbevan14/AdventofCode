@@ -115,6 +115,7 @@ namespace _2017
 			var input = Regex.Replace(File.ReadAllText(path).Trim(), @"\s+", " ").Split(" ").Select(int.Parse).ToArray();
 			var distributions = new List<string>();
 			distributions.Add(string.Join(",", input));
+			// Console.WriteLine(distributions[0]);
 
 			var iterations = 0;
 
@@ -135,9 +136,15 @@ namespace _2017
 				}
 
 				var currentDist = string.Join(",", input);
-				if (distributions.Contains(currentDist)) return iterations;
+				// Console.WriteLine(currentDist);
+				if (distributions.Contains(currentDist)) return iterations - distributions.IndexOf(currentDist);
 				else distributions.Add(currentDist);
 			}
+		}
+	
+		private static int RecursiveCircus(string path)
+		{
+			return 0;
 		}
 	}
 }

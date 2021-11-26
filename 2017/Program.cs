@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace _2017
 {
@@ -9,7 +10,7 @@ namespace _2017
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(EscapeList(@"data/5.txt"));
+            Console.WriteLine(AllocateBlocks(@"data/6.txt"));
         }
 
 		private static int AddDigits(string path)
@@ -108,5 +109,35 @@ namespace _2017
 			//Console.WriteLine(string.Join(" ", nums));
 			return steps;
 		}
-    }
+    
+		private static int AllocateBlocks(string path)
+		{
+			var input = Regex.Replace(File.ReadAllText(path).Trim(), @"\s+", " ").Split(" ").Select(int.Parse).ToArray();
+			var distributions = new List<string>();
+			distributions.Add(string.Join(",", input));
+
+			var iterations = 0;
+
+			while (true)
+			{
+				iterations++;
+				var max = input.Max();
+				var ptr = Array.IndexOf(input, max);
+
+				input[ptr] = 0;
+				while (max > 0)
+				{
+					// Move to the next block
+					ptr++;
+					if (ptr > input.Length - 1) ptr = 0;
+					input[ptr]++;
+					max--;
+				}
+
+				var currentDist = string.Join(",", input);
+				if (distributions.Contains(currentDist)) return iterations;
+				else distributions.Add(currentDist);
+			}
+		}
+	}
 }

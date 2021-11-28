@@ -11,7 +11,7 @@ namespace _2020
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(BusTime(@"data\13.txt"));
+			Console.WriteLine(JurassicTiles(@"data\20.txt"));
 		}
 
 		private static int FindSum(string path)
@@ -585,6 +585,14 @@ namespace _2020
 			return (bus.Value - early) * bus.Key;
 		}
 		
+		private static long JurassicTiles(string path)
+		{
+			var tiles = File.ReadAllText(path).Split("\r\n\r\n", StringSplitOptions.RemoveEmptyEntries);
+			Console.WriteLine(tiles[0]);
+			Console.WriteLine(tiles[1]);
+			return 0;
+		}
+		
 		// Tools
 		private static bool TwoSum(long[] arr, long target)
 		{
@@ -739,6 +747,21 @@ namespace _2020
 			}
 
 			return false;
+		}
+	}
+
+	public class JurassicTile
+	{
+		public int Id { get; set; }
+		public string Top { get; set; }
+		public string Right { get; set; }
+		public string Bottom { get; set; }
+		public string Left { get; set; }
+		public string[,] Grid { get; set; }
+
+		public JurassicTile(string input)
+		{
+			
 		}
 	}
 }

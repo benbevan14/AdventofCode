@@ -10,7 +10,7 @@ namespace _2017
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(AllocateBlocks(@"data/6.txt"));
+            Console.WriteLine(RecursiveCircus(@"data/7.txt"));
         }
 
 		private static int AddDigits(string path)
@@ -142,9 +142,39 @@ namespace _2017
 			}
 		}
 	
-		private static int RecursiveCircus(string path)
+		private static string RecursiveCircus(string path)
 		{
-			return 0;
+			var input = File.ReadAllLines(path);
+			var heldBy = new Dictionary<string, string>();
+
+			foreach (var str in input)
+			{
+				if (str.Contains(">"))
+				{
+					var content = str.Split(">");
+					var holding = content[1].Replace(" ", "").Split(",");
+					foreach (var program in holding)
+					{
+						heldBy[program] = content[0].Trim().Split(" ")[0];
+					}
+				}
+			}
+
+			// foreach (var p in heldBy)
+			// {
+			// 	Console.WriteLine(p.Key + " is held by " + p.Value);
+			// }
+
+			foreach (var str in input)
+			{
+				var key = str.Split(" ")[0];
+				if (!heldBy.ContainsKey(key))
+				{
+					return key;
+				}
+			}
+
+			return "";
 		}
 	}
 }

@@ -176,5 +176,16 @@ namespace _2017
 
 			return "";
 		}
+	
+		private static int Register(string path)
+		{
+			foreach (var instruction in File.ReadAllLines(path).Select(x => x.Split(" ")))
+			{
+				var register = instruction[0];
+				var op = instruction[1];
+				var amount = instruction[2];
+			}
+			return 0;
+		}
 	}
 }

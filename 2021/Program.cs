@@ -8,7 +8,7 @@ namespace _2021
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(SlidingDepth(@"data/1.txt"));
+            Console.WriteLine(PilotSub2(@"data/2.txt"));
         }
 
 		private static int IncreasingDepth(string path)
@@ -33,6 +33,62 @@ namespace _2021
 			}
 
 			return count;
+		}
+
+		private static int PilotSub(string path)
+		{
+			var pos = 0;
+			var depth = 0;
+
+			foreach (var inst in File.ReadAllLines(path))
+			{
+				var content = inst.Split(" ");
+				var mag = int.Parse(content[1]);
+
+				switch (content[0])
+				{
+					case "forward":
+						pos += mag;
+						break;
+					case "down":
+						depth += mag;
+						break;
+					case "up":
+						depth -= mag;
+						break;
+				}
+			}
+
+			return pos * depth;
+		}
+
+		private static int PilotSub2(string path)
+		{
+			var pos = 0;
+			var depth = 0;
+			var aim = 0;
+
+			foreach (var inst in File.ReadAllLines(path))
+			{
+				var content = inst.Split(" ");
+				var mag = int.Parse(content[1]);
+
+				switch (content[0])
+				{
+					case "forward":
+						pos += mag;
+						depth += mag * aim;
+						break;
+					case "down":
+						aim += mag;
+						break;
+					case "up":
+						aim -= mag;
+						break;
+				}
+			}
+
+			return pos * depth;
 		}
     }
 }

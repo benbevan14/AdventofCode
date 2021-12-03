@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace _2021
 {
@@ -8,7 +9,7 @@ namespace _2021
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(PilotSub2(@"data/2.txt"));
+            Console.WriteLine(LifeSupportDiagnostics(@"data/3.txt"));
         }
 
 		private static int IncreasingDepth(string path)
@@ -89,6 +90,62 @@ namespace _2021
 			}
 
 			return pos * depth;
+		}
+
+		private static int Diagnostics(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var len = input.Length;
+			var gamma = new StringBuilder();
+			var epsilon = new StringBuilder();
+
+			for (var i = 0; i < input[0].Length; i++)
+			{
+				var sum = input.Select(x => int.Parse(x.Substring(i, 1))).Sum();
+				if (sum > len / 2) 
+				{
+					gamma.Append("1");
+					epsilon.Append("0");
+				}
+				else
+				{
+					gamma.Append("0");
+					epsilon.Append("1");
+				}
+			}
+
+			return Convert.ToInt32(gamma.ToString(), 2) * Convert.ToInt32(epsilon.ToString(), 2);
+		}
+
+		private static int LifeSupportDiagnostics(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var len = input.Length;
+
+			var oxygen = input.ToList();
+			var co2 = input.ToList();
+
+			for (var i = 0; i < oxygen[0].Length; i++)
+			{
+				var common = oxygen.Select(x => int.Parse(x.Substring(i, 1))).Sum() >= oxygen.Count / 2.0 ? "1" : "0";
+				var uncommon = common == "1" ? "0" : "1";
+				if (oxygen.Count > 1) 
+					oxygen = oxygen.Where(x => x.Substring(i, 1) == common).ToList();
+				else
+					break;
+			}
+
+			for (var i = 0; i < co2[0].Length; i++)
+			{
+				var common = co2.Select(x => int.Parse(x.Substring(i, 1))).Sum() >= co2.Count / 2.0 ? "1" : "0";
+				var uncommon = common == "1" ? "0" : "1";
+				if (co2.Count > 1)
+					co2 = co2.Where(x => x.Substring(i, 1) == uncommon).ToList();
+				else
+					break;
+			}
+
+			return Convert.ToInt32(oxygen[0], 2) * Convert.ToInt32(co2[0], 2);
 		}
     }
 }

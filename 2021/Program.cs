@@ -9,7 +9,20 @@ namespace _2021
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(LifeSupportDiagnostics(@"data/3.txt"));
+			var path = @"data/" + args[2] + ".txt";
+
+			switch (args[0])
+			{
+				case "1":
+					Console.WriteLine(args[1] == "1" ? IncreasingDepth(path) : SlidingDepth(path));
+					break;
+				case "2":
+					Console.WriteLine(args[1] == "1" ? PilotSub(path) : PilotSub2(path));
+					break;
+				case "3":
+					Console.WriteLine(args[1] == "1" ? Diagnostics(path) : LifeSupportDiagnostics(path));
+					break;
+			}
         }
 
 		private static int IncreasingDepth(string path)

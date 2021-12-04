@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace _2021
 {
@@ -21,6 +23,9 @@ namespace _2021
 					break;
 				case "3":
 					Console.WriteLine(args[1] == "1" ? Diagnostics(path) : LifeSupportDiagnostics(path));
+					break;
+				case "4":
+					Console.WriteLine(args[1] == "1" ? WinBingo(path) : LoseBingo(path));
 					break;
 			}
         }
@@ -159,6 +164,107 @@ namespace _2021
 			}
 
 			return Convert.ToInt32(oxygen[0], 2) * Convert.ToInt32(co2[0], 2);
+		}
+
+		private static int WinBingo(string path)
+		{
+			var input = File.ReadAllText(path).Split("\r\n\r\n", StringSplitOptions.RemoveEmptyEntries);
+
+			var numbers = input[0].Split(",").Select(int.Parse).ToArray();
+			var grids = new List<int[]>();
+
+			// read in each grid into an array of nums
+			for (var i = 1; i < input.Length; i++)
+			{
+				var nums = Regex.Replace(input[i], @"\s+", " ").Trim().Split(" ").Select(int.Parse).ToArray();
+				grids.Add(nums);
+			}
+
+			// add each number from the list to each grid
+			for (var n = 0; n < numbers.Length; n++)
+			{
+				// change the number in each grid
+				for (var i = 0; i < grids.Count; i++)
+				{
+					var index = Array.IndexOf(grids[i], numbers[n]);
+					if (index != -1)
+						grids[i][index] = 100;
+				}
+
+				// check each grid to see if any won
+				foreach (var grid in grids)
+				{
+					if (CheckGrid(grid))
+					{
+						return grid.Where(x => x != 100).Sum() * numbers[n];
+					}
+				}
+			}
+
+			return 0;
+		}
+
+		private static int LoseBingo(string path)
+		{
+			var input = File.ReadAllText(path).Split("\r\n\r\n", StringSplitOptions.RemoveEmptyEntries);
+
+			var numbers = input[0].Split(",").Select(int.Parse).ToArray();
+			var grids = new List<int[]>();
+
+			// read in each grid into an array of nums
+			for (var i = 1; i < input.Length; i++)
+			{
+				var nums = Regex.Replace(input[i], @"\s+", " ").Trim().Split(" ").Select(int.Parse).ToArray();
+				grids.Add(nums);
+			}
+
+			// add each number from the list to each grid
+			for (var n = 0; n < numbers.Length; n++)
+			{
+				// change the number in each grid
+				for (var i = 0; i < grids.Count; i++)
+				{
+					var index = Array.IndexOf(grids[i], numbers[n]);
+					if (index != -1)
+						grids[i][index] = 100;
+				}
+
+				// if there's only one grid left and it just finished, return
+				if (grids.Count == 1)
+				{
+					if (CheckGrid(grids[0]))
+						return grids[0].Where(x => x != 100).Sum() * numbers[n];
+				}
+
+				// otherwise remove any grids that are finished
+				grids = grids.Where(x => CheckGrid(x) == false).ToList();
+			}
+
+			return 0;
+		}
+
+
+		private static bool CheckGrid(int[] grid)
+		{
+			// Check all the rows
+			for (var i = 0; i < 5; i++)
+			{
+				var sum = grid.Skip(i * 5).Take(5).Sum();
+				if (sum == 500) return true;
+			}
+
+			// Check all the columns
+			for (var i = 0; i < 5; i++)
+			{
+				var sum = 0;
+				for (var j = 0; j < 5; j++)
+				{
+					sum += grid[j * 5 + i];
+				}
+				if (sum == 500) return true;
+			}
+			
+			return false;
 		}
     }
 }

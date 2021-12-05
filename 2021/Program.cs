@@ -27,6 +27,9 @@ namespace _2021
 				case "4":
 					Console.WriteLine(args[1] == "1" ? WinBingo(path) : LoseBingo(path));
 					break;
+				case "5":
+					Console.WriteLine(args[1] == "1" ? StraightVents(path) : DiagonalVents(path));
+					break;
 			}
         }
 
@@ -241,6 +244,84 @@ namespace _2021
 			}
 
 			return 0;
+		}
+
+		private static int StraightVents(string path)
+		{
+			var lines = File.ReadAllLines(path);
+			var grid = new int[1000, 1000];
+			foreach (var line in lines)
+			{	
+				var content = line.Split(" -> ");
+				var from = content[0].Split(",").Select(int.Parse).ToArray();
+				var to = content[1].Split(",").Select(int.Parse).ToArray();
+
+				var xMin = Math.Min(from[0], to[0]);
+				var xMax = Math.Max(from[0], to[0]);
+				var yMin = Math.Min(from[1], to[1]);
+				var yMax = Math.Max(from[1], to[1]);
+
+				if (xMin == xMax)
+				{
+					for (var i = yMin; i <= yMax; i++) grid[xMin, i]++;
+				}
+				else if (yMin == yMax)
+				{
+					for (var i = xMin; i <= xMax; i++) grid[i, yMin]++;
+				}
+			}
+
+			var count = 0;
+			for (var row = 0; row < 1000; row++)
+			{
+				for (var col = 0; col < 1000; col++)
+				{
+					if (grid[row, col] > 1) count++;
+				}
+			}
+
+			return count;
+		}
+
+		private static int DiagonalVents(string path)
+		{
+			var lines = File.ReadAllLines(path);
+			var grid = new int[1000, 1000];
+			foreach (var line in lines)
+			{	
+				var content = line.Split(" -> ");
+				var from = content[0].Split(",").Select(int.Parse).ToArray();
+				var to = content[1].Split(",").Select(int.Parse).ToArray();
+
+				var xMin = Math.Min(from[0], to[0]);
+				var xMax = Math.Max(from[0], to[0]);
+				var yMin = Math.Min(from[1], to[1]);
+				var yMax = Math.Max(from[1], to[1]);
+
+				if (xMin == xMax)
+				{
+					for (var i = yMin; i <= yMax; i++) grid[xMin, i]++;
+				}
+				else if (yMin == yMax)
+				{
+					for (var i = xMin; i <= xMax; i++) grid[i, yMin]++;
+				}
+				else if ((yMax - yMin) == (xMax - xMin)) // 45 degree diagonal
+				{
+					
+				}
+			}
+
+			var count = 0;
+			for (var row = 0; row < 1000; row++)
+			{
+				for (var col = 0; col < 1000; col++)
+				{
+					if (grid[row, col] > 1) count++;
+				}
+			}
+
+			return count;
 		}
 
 

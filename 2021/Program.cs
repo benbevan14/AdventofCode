@@ -289,26 +289,36 @@ namespace _2021
 			var grid = new int[1000, 1000];
 			foreach (var line in lines)
 			{	
-				var content = line.Split(" -> ");
-				var from = content[0].Split(",").Select(int.Parse).ToArray();
-				var to = content[1].Split(",").Select(int.Parse).ToArray();
+				var sorted = line.Split(" -> ").OrderBy(x => int.Parse(x.Split(",")[0])).ThenBy(x => int.Parse(x.Split(",")[1])).ToArray();
 
-				var xMin = Math.Min(from[0], to[0]);
-				var xMax = Math.Max(from[0], to[0]);
-				var yMin = Math.Min(from[1], to[1]);
-				var yMax = Math.Max(from[1], to[1]);
+				var from = sorted[0].Split(",").Select(int.Parse).ToArray();
+				var to = sorted[1].Split(",").Select(int.Parse).ToArray();
 
-				if (xMin == xMax)
+				if (from[0] == to[0])
 				{
-					for (var i = yMin; i <= yMax; i++) grid[xMin, i]++;
+					for (var i = from[1]; i <= to[1]; i++) grid[from[0], i]++;
 				}
-				else if (yMin == yMax)
+				else if (from[1] == to[1])
 				{
-					for (var i = xMin; i <= xMax; i++) grid[i, yMin]++;
+					for (var i = from[0]; i <= to[0]; i++) grid[i, from[1]]++;
 				}
-				else if ((yMax - yMin) == (xMax - xMin)) // 45 degree diagonal
+				else if (Math.Abs(from[1] - to[1]) == Math.Abs(from[0] - to[0])) // 45 degree diagonal
 				{
-					
+					if ((to[1] - from[1]) * (to[0] - from[0]) > 0)
+					{
+						// positive gradient
+						for (var x = 0; x <= to[0] - from[0]; x++)
+						{
+							grid[from[0] + x, from[1] + x]++;
+						}
+					}
+					else // negative gradient
+					{
+						for (var x = 0; x <= to[0] - from[0]; x++)
+						{
+							grid[from[0] + x, from[1] - x]++;
+						}
+					}
 				}
 			}
 

@@ -31,7 +31,7 @@ namespace _2021
 					Console.WriteLine(args[1] == "1" ? StraightVents(path) : DiagonalVents(path));
 					break;
 				case "6":
-					Console.WriteLine(args[1] == "1" ? SimulateFish(path) : 0);
+					Console.WriteLine(args[1] == "1" ? SimulateFish(path) : ExponentionalFish(path));
 					break;
 			}
         }
@@ -339,8 +339,52 @@ namespace _2021
 
 		private static int SimulateFish(string path)
 		{
-			var fish = File.ReadAllText(path).Split(",").ToArray();
-			return 0;
+			var fish = File.ReadAllText(path).Split(",").Select(int.Parse);
+
+			for (var day = 1; day <= 80; day++)
+			{
+				var newFish = new List<int>();
+				foreach (var f in fish)
+				{
+					if (f == 0)
+					{
+						newFish.Add(6);
+						newFish.Add(8);
+					}
+					else
+					{
+						newFish.Add(f - 1);
+					}
+				}
+
+				fish = newFish;
+			}
+
+			return fish.Count();
+		}
+
+		private static long ExponentionalFish(string path)
+		{
+			var input = File.ReadAllText(path).Split(",").Select(int.Parse);
+			var fish = new long[9];
+
+			foreach (var f in input)
+			{
+				fish[f]++;
+			}
+
+			for (var day = 1; day <= 256; day++)
+			{
+				var spawning = fish[0];
+				for (var i = 0; i < 8; i++)
+				{
+					fish[i] = fish[i + 1];
+				}
+				fish[6] += spawning;
+				fish[8] = spawning;
+			}
+
+			return fish.Sum();
 		}
 
 

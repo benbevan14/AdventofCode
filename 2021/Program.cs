@@ -30,6 +30,9 @@ namespace _2021
 				case "5":
 					Console.WriteLine(args[1] == "1" ? StraightVents(path) : DiagonalVents(path));
 					break;
+				case "6":
+					Console.WriteLine(args[1] == "1" ? SimulateFish(path) : 0);
+					break;
 			}
         }
 
@@ -333,6 +336,13 @@ namespace _2021
 
 			return count;
 		}
+
+		private static int SimulateFish(string path)
+		{
+			var fish = File.ReadAllText(path).Split(",").ToArray();
+			return 0;
+		}
+
 
 
 		private static bool CheckGrid(int[] grid)

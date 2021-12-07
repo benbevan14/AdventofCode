@@ -33,6 +33,10 @@ namespace _2021
 				case "6":
 					Console.WriteLine(args[1] == "1" ? SimulateFish(path) : ExponentionalFish(path));
 					break;
+				case "7":
+					Console.WriteLine(args[1] == "1" ? AlignCrabs(path) : AlignCrabs2(path));
+					break;
+
 			}
         }
 
@@ -385,6 +389,42 @@ namespace _2021
 			}
 
 			return fish.Sum();
+		}
+
+		private static int AlignCrabs(string path)
+		{
+			var crabs = File.ReadAllText(path).Split(",").Select(int.Parse).ToArray();
+
+			var minFuel = int.MaxValue;
+
+			for (var f = crabs.Min(); f <= crabs.Max(); f++)
+			{
+				var sum = crabs.Select(x => Math.Abs(x - f)).Sum();
+				// Console.WriteLine("Target fuel: " + f + " : total fuel required: " + sum);
+				if (sum < minFuel) minFuel = sum;
+			}
+
+			return minFuel;
+		}
+
+		private static int AlignCrabs2(string path)
+		{
+			var crabs = File.ReadAllText(path).Split(",").Select(int.Parse).ToArray();
+
+			var minFuel = int.MaxValue;
+
+			for (var f = crabs.Min(); f <= crabs.Max(); f++)
+			{
+				var sum = crabs.Select(x => 
+				{
+					var n = Math.Abs(x - f);
+					return n * (n + 1) / 2;
+				}).Sum();
+				// Console.WriteLine("Target fuel: " + f + " : total fuel required: " + sum);
+				if (sum < minFuel) minFuel = sum;
+			}
+
+			return minFuel;
 		}
 
 

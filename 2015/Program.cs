@@ -12,16 +12,7 @@ namespace _2015
     {
         static void Main(string[] args)
         {
-			DateTime now = DateTime.Now;
-			string start = "1321131112";
-			for (int i = 0; i < 50; i++)
-			{
-				//Console.WriteLine(start);
-				start = LookAndSay(start);
-			}
-			//Console.WriteLine(start);
-			Console.WriteLine(start.Length);
-			Console.WriteLine("Time taken: " + (DateTime.Now - now).Milliseconds);
+			Console.WriteLine(AssembleCircuit(@"Data/7.txt"));
         }
 
 		// Problem 3:1
@@ -325,10 +316,52 @@ namespace _2015
 		static int AssembleCircuit(string path)
 		{
 			Dictionary<string, int> signals = new Dictionary<string, int>();
+
+			var instructions = File.ReadLines(path);
+
+			// Get a starting point
 			foreach (string line in File.ReadAllLines(path))
 			{
-				Console.WriteLine(line);
+				var content = line.Split(" -> ");
+
+				// if the instruction is just to provide a signal to a wire
+				if (!line.Any(char.IsUpper) && !content[0].Any(char.IsLetter))
+				{
+					Console.WriteLine(line);
+					signals[content[1]] = int.Parse(content[0]);
+				}
 			}
+
+			// process instructions, add them to dictionary and remove
+			while (instructions.Count() > 0)
+			{
+				var newInstructions = new List<string>();
+				
+				foreach (var inst in instructions)
+				{
+					var args = inst.Split(" ");
+					var needed = args.Where(x => x.ToLower() == x).ToArray();
+					// If the dictionary contains all the needed values
+					if (needed.All(value => signals.Keys.Contains(value)))
+					{
+						
+					}
+					else
+					{
+						newInstructions.Add(inst);
+					}
+				}
+
+				instructions = newInstructions;
+			}
+
+
+
+			foreach (var p in signals)
+			{
+				Console.WriteLine(p.Key + ": " + p.Value);
+			}
+
 			return 0;
 		}
 	
@@ -355,7 +388,7 @@ namespace _2015
 		// Problem 8:2
 		static int MatchsticksReverse(string path)
 		{
-			int codeTotal = 0;
+			// int codeTotal = 0;
 			int charsAdded = 0;
 			string[] test = new string[] {};
 			foreach (string line in File.ReadAllLines(path))

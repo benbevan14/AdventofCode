@@ -447,6 +447,8 @@ namespace _2021
 
 		private static int AllDigits(string path)
 		{
+			var total = 0;
+
 			foreach (var line in File.ReadAllLines(path))
 			{
 				var dict = new Dictionary<string, int>();
@@ -461,35 +463,45 @@ namespace _2021
 				var seven = input.Where(x => x.Length == 3).First();
 				var eight = input.Where(x => x.Length == 7).First();
 
-				// decode easy digits
-				// dict.Add(SortString(input.Where(x => x.Length == 2).First()), 1);
-				// dict.Add(SortString(input.Where(x => x.Length == 4).First()), 4);
-				// dict.Add(SortString(input.Where(x => x.Length == 3).First()), 7);
-				// dict.Add(SortString(input.Where(x => x.Length == 7).First()), 8);
+				dict.Add(SortString(one), 1);
+				dict.Add(SortString(four), 4);
+				dict.Add(SortString(seven), 7);
+				dict.Add(SortString(eight), 8);
 
-				// get a
-				var a = UniqueCharacters(seven, one);
-				mapping.Add('a', a[0]);
+				// get f and c
+				// six contains only f, zero and nine contain c too
+				var six = input.Where(x => x.Length == 6 && !(x.Contains(one[0]) && x.Contains(one[1]))).First();
 
-				// 0, 6, 9
-				var sixDigits = input.Where(x => x.Length == 6).ToArray();
-
-				// get f
-				var six = sixDigits.Where(x => !SortString(x).Contains(SortString(one))).First();
-				Console.WriteLine(six);
-				Console.WriteLine(one);
+				// differentiate f and c
 				dict.Add(SortString(six), 6);
-				mapping.Add('f', UniqueCharacters(one, six)[0]);
+				mapping.Add('c', UniqueCharacters(one, six)[0]);
+				mapping.Add('f', char.Parse(one.Replace(mapping['c'].ToString(), String.Empty)));
 
-				foreach (var p in dict)
+				// differentiate 9 and 0
+				var nine = input.Where(x => x.Length == 6 && x != six && x.Contains(four[0]) && x.Contains(four[1]) && x.Contains(four[2]) && x.Contains(four[3])).First();
+				var zero = input.Where(x => x.Length == 6 && x != six && x != nine).First();
+				dict.Add(SortString(zero), 0);
+				dict.Add(SortString(nine), 9);
+
+				// differentiate 2, 3, and 5
+				var two = input.Where(x => x.Length == 5 && x.Contains(mapping['c']) && !x.Contains(mapping['f'])).First();
+				var three = input.Where(x => x.Length == 5 && x.Contains(mapping['c']) && x.Contains(mapping['f'])).First();
+				var five = input.Where(x => x.Length == 5 && !x.Contains(mapping['c']) && x.Contains(mapping['f'])).First();
+				dict.Add(SortString(two), 2);
+				dict.Add(SortString(three), 3);
+				dict.Add(SortString(five), 5);
+
+				// Get the output
+				var res = new StringBuilder();
+				foreach (var num in output)
 				{
-					Console.WriteLine(p.Key + ": " + p.Value);
+					res.Append(dict[SortString(num)]);
 				}
+				
+				total += int.Parse(res.ToString());
 			}
 
-
-
-			return 0;
+			return total;
 		}
 
 
@@ -509,7 +521,6 @@ namespace _2021
 			{
 				if (!sChars.Contains(c))
 				{
-					Console.WriteLine(c);
 					unique.Add(c);
 				}
 			}

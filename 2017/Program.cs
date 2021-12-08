@@ -10,7 +10,15 @@ namespace _2017
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(RecursiveCircus(@"data/7.txt"));
+			var path = @"data/" + args[2] + ".txt";
+
+			switch (args[0])
+			{
+				case "10":
+					Console.WriteLine(args[1] == "1" ? KnotHash(path) : 0);
+					break;
+
+			}
         }
 
 		private static int AddDigits(string path)
@@ -186,6 +194,47 @@ namespace _2017
 				var amount = instruction[2];
 			}
 			return 0;
+		}
+
+		private static int KnotHash(string path)
+		{
+			var nums = Enumerable.Range(0, 256).ToArray();
+			var inputs = File.ReadAllText(path).Split(",").Select(int.Parse).ToArray();
+			var l = nums.Length;
+
+			// Console.WriteLine(string.Join(",", nums));
+
+			var ptr = 0;
+			var skip = 0;
+			foreach (var i in inputs)
+			{
+				if (ptr >= l) ptr -= l;
+
+				for (var j = 0; j < ptr; j++) nums = LeftShiftArray(nums);
+				Array.Reverse(nums, 0, i);
+				for (var j = 0; j < ptr; j++) nums = RightShiftArray(nums);
+
+				ptr += (i + skip);
+				skip++;
+
+				// Console.WriteLine(string.Join(",", nums));
+			}
+
+			Console.WriteLine(string.Join(",", nums));
+
+			return nums[0] * nums[1];
+		}
+
+
+
+		private static int[] LeftShiftArray(int[] arr)
+		{
+			return arr.Skip(1).Concat(arr.Take(1)).ToArray();
+		}
+
+		private static int[] RightShiftArray(int[] arr)
+		{
+			return arr.Skip(arr.Length - 1).Concat(arr.Take(arr.Length - 1)).ToArray();
 		}
 	}
 }

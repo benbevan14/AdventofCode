@@ -36,6 +36,9 @@ namespace _2021
 				case "7":
 					Console.WriteLine(args[1] == "1" ? AlignCrabs(path) : AlignCrabs2(path));
 					break;
+				case "8":
+					Console.WriteLine(args[1] == "1" ? CommonDigits(path) : AllDigits(path));
+					break;
 
 			}
         }
@@ -427,7 +430,92 @@ namespace _2021
 			return minFuel;
 		}
 
+		private static int CommonDigits(string path)
+		{
+			var count = 0;
+			var toFind = new int[] { 2, 3, 4, 7 };
+			
+			foreach (var line in File.ReadAllLines(path))
+			{
+				var content = line.Split(" | ");
+				var output = content[1].Split(" ");
+				count += output.Where(x => toFind.Contains(x.Length)).Count();
+			}
 
+			return count;
+		}
+
+		private static int AllDigits(string path)
+		{
+			foreach (var line in File.ReadAllLines(path))
+			{
+				var dict = new Dictionary<string, int>();
+				var mapping = new Dictionary<char, char>();
+
+				var content = line.Split(" | ");
+				var input = content[0].Split(" ");
+				var output = content[1].Split(" ");
+
+				var one = input.Where(x => x.Length == 2).First();
+				var four = input.Where(x => x.Length == 4).First();
+				var seven = input.Where(x => x.Length == 3).First();
+				var eight = input.Where(x => x.Length == 7).First();
+
+				// decode easy digits
+				// dict.Add(SortString(input.Where(x => x.Length == 2).First()), 1);
+				// dict.Add(SortString(input.Where(x => x.Length == 4).First()), 4);
+				// dict.Add(SortString(input.Where(x => x.Length == 3).First()), 7);
+				// dict.Add(SortString(input.Where(x => x.Length == 7).First()), 8);
+
+				// get a
+				var a = UniqueCharacters(seven, one);
+				mapping.Add('a', a[0]);
+
+				// 0, 6, 9
+				var sixDigits = input.Where(x => x.Length == 6).ToArray();
+
+				// get f
+				var six = sixDigits.Where(x => !SortString(x).Contains(SortString(one))).First();
+				Console.WriteLine(six);
+				Console.WriteLine(one);
+				dict.Add(SortString(six), 6);
+				mapping.Add('f', UniqueCharacters(one, six)[0]);
+
+				foreach (var p in dict)
+				{
+					Console.WriteLine(p.Key + ": " + p.Value);
+				}
+			}
+
+
+
+			return 0;
+		}
+
+
+
+		private static string SortString(string s)
+		{
+			var chars = s.ToCharArray();
+			Array.Sort(chars);
+			return new string(chars);
+		}
+
+		private static char[] UniqueCharacters(string l, string s)
+		{
+			var unique = new List<char>();
+			var sChars = s.ToCharArray();
+			foreach (var c in l)
+			{
+				if (!sChars.Contains(c))
+				{
+					Console.WriteLine(c);
+					unique.Add(c);
+				}
+			}
+
+			return unique.ToArray();
+		}
 
 		private static bool CheckGrid(int[] grid)
 		{

@@ -39,6 +39,9 @@ namespace _2021
 				case "8":
 					Console.WriteLine(args[1] == "1" ? CommonDigits(path) : AllDigits(path));
 					break;
+				case "9":
+					Console.WriteLine(args[1] == "1" ? LowPoints(path) : 0);
+					break;
 
 			}
         }
@@ -502,6 +505,69 @@ namespace _2021
 			}
 
 			return total;
+		}
+
+		private static int LowPoints(string path)
+		{
+			var input = Regex.Replace(File.ReadAllText(path), @"\s+", "");
+
+			var grid = new int[100, 100];
+
+			// fill the grid
+			for (var row = 0; row < 100; row++)
+			{
+				for (var col = 0; col < 100; col++)
+				{
+					grid[row, col] = int.Parse(input[row * 100 + col].ToString());
+					// Console.Write(grid[row, col]);
+				}
+				// Console.WriteLine();
+			}
+
+			var riskSum = 0;
+
+			// iterate through the grid
+			for (var row = 0; row < 100; row++)
+			{
+				for (var col = 0; col < 100; col++)
+				{
+					var current = grid[row, col];
+					var low = true;
+					// check the four directions
+
+					var dirs = new int[4][] 
+					{
+						new int[] { 1,  0}, 
+						new int[] { 0, -1}, 
+						new int[] {-1,  0}, 
+						new int[] { 0,  1}
+					};
+
+					foreach (var dir in dirs)
+					{
+						var dx = dir[0];
+						var dy = dir[1];
+
+						// check the point is inside the grid
+						if (row + dx >= 0 && row + dx < 100 && col + dy >= 0 && col + dy < 100)
+						{
+							if (grid[row + dx, col + dy] <= current)
+							{
+								low = false;
+								break;
+							}
+						}
+					}
+					
+					if (low) 
+					{
+						Console.WriteLine(current + " | " + row + ", " + col);
+						riskSum += (current + 1);
+					}
+				}
+			}
+
+			return riskSum;
 		}
 
 

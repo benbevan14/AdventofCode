@@ -40,7 +40,7 @@ namespace _2021
 					Console.WriteLine(args[1] == "1" ? CommonDigits(path) : AllDigits(path));
 					break;
 				case "9":
-					Console.WriteLine(args[1] == "1" ? LowPoints(path) : 0);
+					Console.WriteLine(args[1] == "1" ? LowPoints(path) : Basins(path));
 					break;
 
 			}
@@ -570,6 +570,92 @@ namespace _2021
 			return riskSum;
 		}
 
+		private static int Basins(string path)
+		{
+			var input = Regex.Replace(File.ReadAllText(path), @"\s+", "");
+
+			var grid = new int[100, 100];
+
+			// fill the grid
+			for (var row = 0; row < 100; row++)
+			{
+				for (var col = 0; col < 100; col++)
+				{
+					grid[row, col] = int.Parse(input[row * 100 + col].ToString());
+					// Console.Write(grid[row, col]);
+				}
+				// Console.WriteLine();
+			}
+
+			var lowPoints = new List<string>();
+			var basins = new Dictionary<string, List<string>>();
+
+			// iterate through the grid
+			// if it's a low point, add it to the list of low points
+			for (var row = 0; row < 100; row++)
+			{
+				for (var col = 0; col < 100; col++)
+				{
+					var current = grid[row, col];
+					var low = true;
+					// check the four directions
+
+					var dirs = new int[4][] 
+					{
+						new int[] { 1,  0}, 
+						new int[] { 0, -1}, 
+						new int[] {-1,  0}, 
+						new int[] { 0,  1}
+					};
+
+					foreach (var dir in dirs)
+					{
+						var dx = dir[0];
+						var dy = dir[1];
+
+						// check the point is inside the grid
+						if (row + dx >= 0 && row + dx < 100 && col + dy >= 0 && col + dy < 100)
+						{
+							if (grid[row + dx, col + dy] <= current)
+							{
+								low = false;
+								break;
+							}
+						}
+					}
+					
+					if (low) lowPoints.Add(row + "," + col);
+				}
+			}
+
+			// add each low point as a dictionary entry
+			foreach (var p in lowPoints)
+			{
+				basins[p] = new List<string>();
+			}
+
+			// iterate through the grid again and add each point to a basin
+			for (var row = 0; row < 100; row++)
+			{
+				for (var col = 0; col < 100; col++)
+				{
+					// ignore high points
+					if (grid[row, col] != 9)
+					{
+						var lowest = GetBasin(grid, row, col, lowPoints);
+						basins[lowest].Add(row + "," + col);
+					}
+				}
+			}
+
+			foreach (var basin in basins)
+			{
+				Console.WriteLine(basin.Key + ": " + basin.Value.Count);
+			}
+
+			return basins.Select(x => x.Value.Count).OrderByDescending(x => x).Take(3).Aggregate((x, y) => x * y);
+		}
+
 
 
 		private static string SortString(string s)
@@ -615,6 +701,53 @@ namespace _2021
 			}
 			
 			return false;
+		}
+
+		private static string GetBasin(int[,] grid, int row, int col, List<string> low)
+		{
+			// if it's a low point, return this point
+			if (low.Contains(row + "," + col)) return (row + "," + col);
+
+			var current = grid[row, col];
+
+			// while current is not in the list of low points, find the smallest point adjacent to it
+			while (!low.Contains(row + "," + col))
+			{
+				var dirs = new int[4][]
+				{
+					new int[] {1, 0},
+					new int[] {0, -1},
+					new int[] {-1, 0},
+					new int[] {0, 1}
+				};
+
+				var lowest = current;
+				var direction = new int[] {0, 0};
+
+				foreach (var dir in dirs)
+				{
+					var dx = dir[0];
+					var dy = dir[1];
+
+					// check it's in the grid
+					if (row + dx >= 0 && row + dx < 100 && col + dy >= 0 && col + dy < 100)
+					{
+						// check if it's smaller
+						if (grid[row + dx, col + dy] < lowest)
+						{
+							lowest = grid[row + dx, col + dy];
+							direction = dir;
+						}
+					}
+				}
+
+				// move to the next pos
+				current = lowest;
+				row += direction[0];
+				col += direction[1];
+			}
+
+			return (row + "," + col);
 		}
     }
 }

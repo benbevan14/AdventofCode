@@ -12,7 +12,7 @@ namespace _2015
     {
         static void Main(string[] args)
         {
-			Console.WriteLine(AssembleCircuit(@"Data/7.txt"));
+			Console.WriteLine(HasStraight("abdeghi"));
         }
 
 		// Problem 3:1
@@ -459,5 +459,32 @@ namespace _2015
 
 			return result;
 		}
+	
+	
+
+		static string NewPassword(string input)
+		{
+
+		}
+
+		static bool HasStraight(string input)
+		{
+			for (var i = 0; i < input.Length - 2; i++)
+			{
+				if (input[i] + 1 == input[i + 1] && input[i] + 2 == input[i + 2]) return true;
+			}
+
+			return false;
+		}
+
+		static bool HasLegalCharacters(string input)
+		{
+			return !input.Any(x => x == 'i' || x == 'o' || x == 'l');
+		}
+
+		// static bool HasPairs(string input)
+		// {
+
+		// }
 	}
 }

@@ -462,10 +462,10 @@ namespace _2015
 	
 	
 
-		static string NewPassword(string input)
-		{
+		// static string NewPassword(string input)
+		// {
 
-		}
+		// }
 
 		static bool HasStraight(string input)
 		{

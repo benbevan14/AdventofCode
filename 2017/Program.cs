@@ -17,6 +17,9 @@ namespace _2017
 				case "10":
 					Console.WriteLine(args[1] == "1" ? KnotHash(path) : 0);
 					break;
+				case "11":
+					Console.WriteLine(args[1] == "1" ? HexGrid(path) : HexGridFurthest(path));
+					break;
 
 			}
         }
@@ -223,6 +226,91 @@ namespace _2017
 			Console.WriteLine(string.Join(",", nums));
 
 			return nums[0] * nums[1];
+		}
+
+		private static int HexGrid(string path)
+		{
+			var q = 0;
+			var r = 0;
+
+			foreach (var step in File.ReadAllText(path).Split(","))
+			{
+				switch (step)
+				{
+					case "n":
+						r--;
+						break;
+					case "ne":
+						q++;
+						r--;
+						break;
+					case "se":
+						q++;
+						break;
+					case "s":
+						r++;
+						break;
+					case "sw":
+						q--;
+						r++;
+						break;
+					case "nw":
+						q--;
+						break;
+				}
+			}
+
+			var s = -q - r;
+			q = Math.Abs(q);
+			r = Math.Abs(r);
+			s = Math.Abs(s);
+
+			return Math.Max(Math.Max(q, r), s);
+		}
+
+		private static int HexGridFurthest(string path)
+		{
+			var q = 0;
+			var r = 0;
+
+			var furthest = 0;
+
+			foreach (var step in File.ReadAllText(path).Split(","))
+			{
+				switch (step)
+				{
+					case "n":
+						r--;
+						break;
+					case "ne":
+						q++;
+						r--;
+						break;
+					case "se":
+						q++;
+						break;
+					case "s":
+						r++;
+						break;
+					case "sw":
+						q--;
+						r++;
+						break;
+					case "nw":
+						q--;
+						break;
+				}
+
+				var rTemp = Math.Abs(r);
+				var qTemp = Math.Abs(q);
+				var s = Math.Abs(-q - r);
+
+				var dist = Math.Max(Math.Max(rTemp, qTemp), s);
+
+				if (dist > furthest) furthest = dist;
+			}
+
+			return furthest;
 		}
 
 

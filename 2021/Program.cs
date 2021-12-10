@@ -42,6 +42,9 @@ namespace _2021
 				case "9":
 					Console.WriteLine(args[1] == "1" ? LowPoints(path) : Basins(path));
 					break;
+				case "10":
+					Console.WriteLine(args[1] == "1" ? CheckBrackets(path) : CompleteBrackets(path));
+					break;
 
 			}
         }
@@ -655,6 +658,101 @@ namespace _2021
 
 			return basins.Select(x => x.Value.Count).OrderByDescending(x => x).Take(3).Aggregate((x, y) => x * y);
 		}
+
+		private static int CheckBrackets(string path)
+		{
+			var lines = File.ReadAllLines(path);
+
+			var opening = new List<char>(new char[] { '{', '[', '(', '<' });
+			var scores = new Dictionary<char, int>
+			{
+				{ ')', 3 },
+				{ ']', 57 },
+				{ '}', 1197 },
+				{ '>', 25137 }
+			};
+			var opposite = new Dictionary<char, char>
+			{
+				{ '(', ')' },
+				{ '[', ']' },
+				{ '{', '}' },
+				{ '<', '>' }
+			};
+
+			var score = 0;
+
+			foreach (var line in lines)
+			{
+				var stack = new Stack<char>();
+
+				foreach (var b in line)
+				{
+					if (opening.Contains(b)) stack.Push(b);
+					else if (b != opposite[stack.Pop()])
+					{
+						score += scores[b];
+						break;
+					}
+				}
+			}
+
+			return score;
+		}
+
+		private static long CompleteBrackets(string path)
+		{
+			var lines = File.ReadAllLines(path);
+			var scores = new Dictionary<char, int>
+			{
+				{ ')', 1 },
+				{ ']', 2 },
+				{ '}', 3 },
+				{ '>', 4 }
+			};
+			var opposite = new Dictionary<char, char>
+			{
+				{ '(', ')' },
+				{ '[', ']' },
+				{ '{', '}' },
+				{ '<', '>' }
+			};
+
+			var totals = new List<long>();
+
+			foreach (var line in lines)
+			{
+				var stack = new Stack<char>();
+				var valid = true;
+
+				foreach (var b in line)
+				{
+					if (opposite.ContainsKey(b)) stack.Push(b);
+					else if (b != opposite[stack.Pop()]) 
+					{
+						valid = false;
+						break;
+					}
+				}
+
+				if (valid)
+				{
+					long score = 0;
+
+					while (stack.Count > 0)
+					{
+						score *= 5;
+						score += scores[opposite[stack.Pop()]];
+					}
+
+					totals.Add(score);
+				}
+			}
+
+			return totals.OrderBy(x => x).Skip(totals.Count / 2).First();
+		}
+
+
+
 
 
 

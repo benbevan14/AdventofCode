@@ -45,6 +45,9 @@ namespace _2021
 				case "10":
 					Console.WriteLine(args[1] == "1" ? CheckBrackets(path) : CompleteBrackets(path));
 					break;
+				case "11":
+					Console.WriteLine(args[1] == "1" ? OctopusFlash(path) : SimultaneousFlash(path));
+					break;
 
 			}
         }
@@ -751,6 +754,44 @@ namespace _2021
 			return totals.OrderBy(x => x).Skip(totals.Count / 2).First();
 		}
 
+		private static int OctopusFlash(string path)
+		{
+			var input = Regex.Replace(File.ReadAllText(path), @"\s+", "");
+
+			var grid = FillGrid(input, 10, 10);
+
+			DisplayGrid(grid);
+
+			var total = 0;
+
+			// step through
+			for (var i = 1; i <= 100; i++)
+			{
+				total += IterateOctopus(grid);
+			}
+
+			Console.WriteLine();
+			DisplayGrid(grid);
+
+			return total;
+		}
+
+		private static int SimultaneousFlash(string path)
+		{
+			var input = Regex.Replace(File.ReadAllText(path), @"\s+", "");
+
+			var grid = FillGrid(input, 10, 10);
+
+			DisplayGrid(grid);
+
+			for (var i = 1; i <= 1000; i++)
+			{
+				if (IterateOctopus(grid) == 100) return i;
+			}
+
+			return 0;
+		}
+
 
 
 
@@ -846,6 +887,107 @@ namespace _2021
 			}
 
 			return (row + "," + col);
+		}
+
+		private static int[,] FillGrid(string input, int rows, int cols)
+		{
+			var grid = new int[rows, cols];
+			for (var row = 0; row < rows; row++)
+			{
+				for (var col = 0; col < cols; col++)
+				{
+					grid[row, col] = int.Parse(input[row * rows + col].ToString());
+				}
+			}
+
+			return grid;
+		}
+
+		private static bool GridFlash(int[,] grid)
+		{
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					if (grid[row, col] > 9) return true;
+				}
+			}
+
+			return false;
+		}
+
+		private static void DisplayGrid(int[,] grid)
+		{
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					Console.Write(grid[row, col] + " ");
+				}
+				Console.WriteLine();
+			}
+		}
+
+		private static int IterateOctopus(int[,] grid)
+		{
+			var rows = 10;
+			var cols = 10;
+
+			// increase all values by one
+			for (var row = 0; row < rows; row++)
+			{
+				for (var col = 0; col < cols; col++)
+				{
+					grid[row, col]++;
+				}
+			}
+
+			var flashes = 0;
+
+			// if there are any 9s left in the grid
+			while (GridFlash(grid))
+			{
+				for (var row = 0; row < rows; row++)
+				{
+					for (var col = 0; col < cols; col++)
+					{
+						if (grid[row, col] > 9)
+						{
+							IncrementNeighbours(grid, row, col);
+							grid[row, col] = -1000;
+							flashes++;
+						}
+					}
+				}
+			}
+
+			// set positions that have flashed back to zero
+			for (var row = 0; row < rows; row++)
+			{
+				for (var col = 0; col < cols; col++)
+				{
+					if (grid[row, col] < 0) grid[row, col] = 0;
+				}
+			}
+
+			return flashes;
+		}
+
+		private static void IncrementNeighbours(int[,] grid, int row, int col)
+		{
+			for (var dx = -1; dx <= 1; dx++)
+			{
+				for (var dy = -1; dy <= 1; dy++)
+				{
+					if (dx == 0 && dy == 0) continue;
+
+					// check the neighbour is in the grid
+					if (row + dx >= 0 && row + dx < grid.GetLength(0) && col + dy >= 0 && col + dy < grid.GetLength(1))
+					{
+						grid[row + dx, col + dy]++;
+					}	
+				}
+			}
 		}
     }
 }

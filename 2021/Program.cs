@@ -49,7 +49,7 @@ namespace _2021
 					Console.WriteLine(args[1] == "1" ? OctopusFlash(path) : SimultaneousFlash(path));
 					break;
 				case "12":
-					Console.WriteLine(args[1] == "1" ? FindRoutes(path) : 0);
+					Console.WriteLine(args[1] == "1" ? FindRoutes(path) : FindRoutes2(path));
 					break;
 			}
         }
@@ -808,7 +808,6 @@ namespace _2021
 				{
 					connections[route[1]] = new List<string>();
 				}
-
 				if (!connections[route[1]].Contains(route[0]))
 				{
 					connections[route[1]].Add(route[0]);
@@ -828,6 +827,42 @@ namespace _2021
 			}
 
 			return counter;
+		}
+
+		private static int FindRoutes2(string path)
+		{
+			var connections = new Dictionary<string, List<string>>();
+
+			foreach (var route in File.ReadAllLines(path).Select(x => x.Split("-")))
+			{
+				if (!connections.ContainsKey(route[0]))
+				{
+					connections[route[0]] = new List<string>();
+				}
+				if (!connections.ContainsKey(route[1]))
+				{
+					connections[route[1]] = new List<string>();
+				}
+				if (!connections[route[1]].Contains(route[0]))
+				{
+					connections[route[1]].Add(route[0]);
+				}
+				if (!connections[route[0]].Contains(route[1]))
+				{
+					connections[route[0]].Add(route[1]);
+				}
+			}
+
+			var routes = new HashSet<string>();
+
+			ContinuePathDouble(connections, "start", new List<string>(new string[] {"start"}), "", true, ref routes);
+
+			foreach (var key in connections.Keys.Where(x => x.All(char.IsLower) && x != "start" && x != "end"))
+			{
+				ContinuePathDouble(connections, "start", new List<string>(new string[] {"start"}), key, false, ref routes);
+			}
+
+			return routes.Count;
 		}
 
 		private static void ContinuePath(Dictionary<string, List<string>> connections, string current, List<string> visited, ref int counter)
@@ -855,6 +890,42 @@ namespace _2021
 				current = node; 
 				v.Add(current);
 				ContinuePath(connections, current, v, ref counter);
+			}
+
+			return;
+		}
+
+		private static void ContinuePathDouble(Dictionary<string, List<string>> connections, string current, List<string> visited, string twice, bool done, ref HashSet<string> routes)
+		{
+			// get the nodes that can be moved to
+			var available = connections[current].Where(x => (!visited.Contains(x) || x.All(char.IsUpper)) && x != current).ToList();
+
+			// if we've only visited the double node once, add it again if possible
+			if (!done && visited.Where(x => x == twice).Count() == 1 && connections[current].Contains(twice))
+			{
+				available.Add(twice);
+			}
+
+			// if there are no available nodes, backtrack
+			if (available.Count() == 0)
+			{
+				return;
+			}
+
+			// if we've got to the end, output the path and increment the counter
+			if (current == "end")
+			{
+				routes.Add(string.Join(",", visited));
+				return;
+			}
+
+			// for every available next node, add it to the list of visited nodes and search from there
+			foreach (var node in available)
+			{
+				var v = new List<string>(visited);
+				current = node; 
+				v.Add(current);
+				ContinuePathDouble(connections, current, v, twice, done, ref routes);
 			}
 
 			return;

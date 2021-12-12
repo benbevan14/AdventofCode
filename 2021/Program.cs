@@ -48,7 +48,9 @@ namespace _2021
 				case "11":
 					Console.WriteLine(args[1] == "1" ? OctopusFlash(path) : SimultaneousFlash(path));
 					break;
-
+				case "12":
+					Console.WriteLine(args[1] == "1" ? FindRoutes(path) : 0);
+					break;
 			}
         }
 
@@ -790,6 +792,72 @@ namespace _2021
 			}
 
 			return 0;
+		}
+
+		private static int FindRoutes(string path)
+		{
+			var connections = new Dictionary<string, List<string>>();
+
+			foreach (var route in File.ReadAllLines(path).Select(x => x.Split("-")))
+			{
+				if (!connections.ContainsKey(route[0]))
+				{
+					connections[route[0]] = new List<string>();
+				}
+				if (!connections.ContainsKey(route[1]))
+				{
+					connections[route[1]] = new List<string>();
+				}
+
+				if (!connections[route[1]].Contains(route[0]))
+				{
+					connections[route[1]].Add(route[0]);
+				}
+				if (!connections[route[0]].Contains(route[1]))
+				{
+					connections[route[0]].Add(route[1]);
+				}
+			}
+
+			var counter = 0;
+			ContinuePath(connections, "start", new List<string>(new string[] {"start"}), ref counter);
+
+			foreach (var connection in connections)
+			{
+				Console.WriteLine($"{connection.Key}: {string.Join(" ", connection.Value)}");
+			}
+
+			return counter;
+		}
+
+		private static void ContinuePath(Dictionary<string, List<string>> connections, string current, List<string> visited, ref int counter)
+		{	
+			// get the nodes that can be moved to
+			var available = connections[current].Where(x => (!visited.Contains(x) || x.All(char.IsUpper)) && x != current);
+
+			// if there are no available nodes, backtrack
+			if (available.Count() == 0)
+			{
+				return;
+			}
+
+			// if we've got to the end, output the path and increment the counter
+			if (current == "end")
+			{
+				counter++;
+				return;
+			}
+
+			// for every available next node, add it to the list of visited nodes and search from there
+			foreach (var node in available)
+			{
+				var v = new List<string>(visited);
+				current = node; 
+				v.Add(current);
+				ContinuePath(connections, current, v, ref counter);
+			}
+
+			return;
 		}
 
 

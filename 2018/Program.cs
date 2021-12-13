@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(MoveStars(@"data\10.txt"));
+            Console.WriteLine(FuelGrid());
         }
 
 		private static int RepeatFrequency(string path)
@@ -176,6 +176,67 @@ namespace _2018
 			return time;
 		}
 
+		private static string FuelGrid()
+		{
+			var grid = new int[300, 300];
+			var serial = 4172;
+
+			for (var row = 0; row < 300; row++)
+			{
+				for (var col = 0; col < 300; col++)
+				{
+					var x = col + 1;
+					var y = row + 1;
+
+					var rack = x + 10;
+					var power = y * rack;
+					power += serial;
+					power *= rack;
+					power = (int) Math.Abs(power / 100 % 10) - 5;
+
+					grid[row, col] = power;
+				}
+			}
+
+			var highest = 0;
+			var topLeft = new int[] { 0, 0 };
+			var bestSize = 0;
+
+			for (var size = 1; size <= 100; size++)
+			{
+				for (var row = 0; row < 301 - size; row++)
+				{
+					var total = 0;
+					for (var r = row; r < row + size; r++)
+					{
+						for (var c = 0; c < size; c++)
+						{
+							total += grid[r, c];
+						}
+					}
+
+					// for each column, add the column and remove the one 3 columns back
+					for (var col = size; col < 300; col++)
+					{
+						for (var r = row; r < row + size; r++) 
+						{
+							total -= grid[r, col - size];
+							total += grid[r, col];
+						}
+
+						if (total > highest)
+						{
+							highest = total;
+							topLeft = new int[] { col - size + 2, row + 1 };
+							bestSize = size;
+						}
+					}
+				}
+			}
+
+			return topLeft[0] + "," + topLeft[1] + "," + bestSize;
+		}
+
 		
 
 		// Tools ================================================================
@@ -191,11 +252,5 @@ namespace _2018
 			}
 			return true;
 		}
-
-		private static void DisplayStars(List<int[]> pos, int width, int height)
-		{
-
-		}
-		
     }
 }

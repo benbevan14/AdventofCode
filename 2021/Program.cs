@@ -51,6 +51,9 @@ namespace _2021
 				case "12":
 					Console.WriteLine(args[1] == "1" ? FindRoutes(path) : FindRoutes2(path));
 					break;
+				case "13":
+					Console.WriteLine(args[1] == "1" ? FoldOrigami(path) : 0);
+					break;
 			}
         }
 
@@ -929,6 +932,99 @@ namespace _2021
 			}
 
 			return;
+		}
+
+		private static int FoldOrigami(string path)
+		{
+			var input = File.ReadAllLines(path).Where(x => x != string.Empty);
+			var coords = input.Where(x => char.IsDigit(x[0])).ToArray();
+			var folds = input.Where(x => x[0] == 'f').ToArray();
+
+			var width = 1311;
+			var height = 895;
+
+			var grid = new bool[height, width];
+
+			// read in points
+			foreach (var c in coords)
+			{
+				var temp = c.Split(",").Select(int.Parse).ToArray();
+				grid[temp[1], temp[0]] = true;
+			}
+
+			// fold
+			foreach (var fold in folds)
+			{
+				var content = fold.Split(" ")[2].Split("=");
+				var dim = content[0];
+				var coord = int.Parse(content[1]);
+
+				if (dim == "y")
+				{
+					var newGrid = new bool[(grid.GetLength(0) - 1) / 2, grid.GetLength(1)];
+					
+					// iterate through the grid and fold up any points in the bottom half
+					for (var row = 0; row < grid.GetLength(0); row++)
+					{
+						for (var col = 0; col < grid.GetLength(1); col++)
+						{
+							// if the point was already filled, add it to the new grid
+							if (row < coord && grid[row, col])
+							{
+								newGrid[row, col] = true;
+							}
+
+							// if the point is filled in the bottom half, fold it up
+							if (row > coord && grid[row, col])
+							{
+								var newRow = Math.Abs(row - (2 * coord));
+								newGrid[newRow, col] = true;
+							}
+						}
+					}
+					grid = newGrid;
+				}
+				else
+				{
+					var newGrid = new bool[grid.GetLength(0), (grid.GetLength(1) - 1) / 2];
+
+					// iterate through the grid
+					for (var row = 0; row < grid.GetLength(0); row++)
+					{
+						for (var col = 0; col < grid.GetLength(1); col++)
+						{
+							// if the point was already filled, add it to the new grid
+							if (col < coord && grid[row, col])
+							{
+								newGrid[row, col] = true;
+							}
+
+							// if the point is filled in the right half, fold it left
+							if (col > coord && grid[row, col])
+							{
+								var newCol = Math.Abs(col - (2 * coord));
+								newGrid[row, newCol] = true;
+							}
+						}
+					}
+					grid = newGrid;
+				}
+			}
+
+			var dotCounter = 0;
+
+			// Display grid
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					if (grid[row, col]) dotCounter++;
+					Console.Write((grid[row, col] ? "#" : '.' ));
+				}
+				Console.WriteLine();
+			}
+
+			return dotCounter;
 		}
 
 

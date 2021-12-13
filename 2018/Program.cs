@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(PlantPots(@"data/12.txt"));
+            Console.WriteLine(MinecartMadness(@"data/13.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -298,6 +298,64 @@ namespace _2018
 			return total;
 		}
 
+		private static string MinecartMadness(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			// grid dimensions
+			var width = input[0].Length;
+			var height = input.Length;
+
+			// list of carts
+			var carts = new List<Cart>();
+
+			// initialise and fill grid
+			var grid = new char[height, width];
+			for (var row = 0; row < height; row++)
+			{
+				for (var col = 0; col < width; col++)
+				{
+					var c = input[row][col];
+					// if a cart was found, replace the character in the grid and add a new cart to the list
+					if (c == '^' || c == '>' || c == 'v' || c == '<')
+					{
+						if (c == '^' || c == 'v') grid[row, col] = '|';
+						else grid[row, col] = '-';
+						carts.Add(new Cart(col, row, c));
+					}
+					// otherwise just copy it from the input
+					else grid[row, col] = input[row][col];
+				}
+			}
+
+			DisplayMinecarts(grid, carts);
+
+			var collided = false;
+
+			while (!collided)
+			{
+				carts.OrderBy(x => x.X).ThenBy(x => x.Y);
+				for (var i = 0; i < carts.Count; i++)
+				{
+					carts[i].Move(grid);
+
+					for (var j = 0; j < carts.Count; j++)
+					{
+						if (i == j) continue;
+
+						if (carts[i].X == carts[j].X && carts[i].Y == carts[j].Y)
+						{
+							collided = true;
+							DisplayMinecarts(grid, carts);
+							return carts[i].X + "," + carts[i].Y;
+						}
+					}
+				}
+			}
+
+			return null;
+		}
+
 		
 
 		// Tools ================================================================
@@ -323,5 +381,149 @@ namespace _2018
 
 			return true;
 		}
+
+		private static void DisplayMinecarts(char[,] grid, List<Cart> carts)
+		{
+			for (var row = 0; row < grid.GetLength(0); row++)
+			{
+				for (var col = 0; col < grid.GetLength(1); col++)
+				{
+					var dir = '.';
+					// check through all the carts
+					foreach (var cart in carts)
+					{
+						if (cart.X == col && cart.Y == row) 
+						{
+							if (dir != '.') dir = 'X';
+							else dir = cart.Direction;
+						}
+					}
+
+					if (dir != '.') Console.Write(dir);
+					// if we didn't find one, write the grid character instead
+					else Console.Write(grid[row, col]);
+				}
+				Console.WriteLine();
+			}
+		}
     }
+
+	public class Cart
+	{
+		public int X { get; set; }
+		public int Y { get; set; }
+		public char Direction { get; set; }
+		public int Choice { get; set; }
+		private Dictionary<char, char> Mappings { get; set; }
+
+		public Cart(int X, int Y, char Direction)
+		{
+			this.X = X;
+			this.Y = Y;
+			this.Direction = Direction;
+			this.Choice = 0;
+			this.Mappings = new Dictionary<char, char>
+			{
+				{ '^', '>' },
+				{ '>', 'v' },
+				{ 'v', '<' },
+				{ '<', '^' }
+			};
+		}
+
+		public void TurnLeft()
+		{
+			TurnRight();
+			TurnRight();
+			TurnRight();
+		}
+
+		public void TurnRight()
+		{
+			Direction = Mappings[Direction];
+		}
+
+		public void Decide()
+		{
+			switch (Choice)
+			{
+				case 0:
+					TurnLeft();
+					break;
+				case 1:
+					break;
+				case 2:
+					TurnRight();
+					break;
+			}
+			Choice = (Choice + 1) % 3;
+		}
+
+		public void Move(char[,] grid)
+		{
+			switch (Direction)
+			{
+				case '^':
+					Y--;
+					switch (grid[Y, X])
+					{
+						case '/':
+							TurnRight();
+							break;
+						case '\\':
+							TurnLeft();
+							break;
+						case '+':
+							Decide();
+							break;
+					}
+					break;
+				case '>':
+					X++;
+					switch (grid[Y, X])
+					{
+						case '/':
+							TurnLeft();
+							break;
+						case '\\':
+							TurnRight();
+							break;
+						case '+':
+							Decide();
+							break;
+					}
+					break;
+				case 'v':
+					Y++;
+					switch (grid[Y, X])
+					{
+						case '/':
+							TurnRight();
+							break;
+						case '\\':
+							TurnLeft();
+							break;
+						case '+':
+							Decide();
+							break;
+					}
+					break;
+				case '<':
+					X--;
+					switch (grid[Y, X])
+					{
+						case '/':
+							TurnLeft();
+							break;
+						case '\\':
+							TurnRight();
+							break;
+						case '+':
+							Decide();
+							break;
+					}
+					break;
+			}
+		}
+	}
 }

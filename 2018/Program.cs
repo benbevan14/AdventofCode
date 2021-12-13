@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(FabricSize(@"data\test.txt"));
+            Console.WriteLine(MoveStars(@"data\10.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -114,6 +114,68 @@ namespace _2018
 			return count;
 		}
 
+		private static int MoveStars(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			var pos = new List<int[]>();
+			var vel = new List<int[]>();
+
+			foreach (var p in input.Select(x => x.Substring(10, 14)).Select(x => x.Split(",")))
+			{
+				pos.Add(new int[] { int.Parse(p[0].Trim()), int.Parse(p[1].Trim()) });
+			}
+
+			foreach (var v in input.Select(x => x.Substring(36, 6)).Select(x => x.Split(",")))
+			{
+				vel.Add(new int[] { int.Parse(v[0].Trim()), int.Parse(v[1].Trim()) });
+			}
+
+			var width = pos.Select(x => x[0]).Max() - pos.Select(x => x[0]).Min() + 1;
+			var height = pos.Select(x => x[1]).Max() - pos.Select(x => x[1]).Min() + 1;
+
+			var time = 0;
+
+			for (var i = 1; i < 100000; i++)
+			{
+				for (var p = 0; p < pos.Count; p++)
+				{
+					pos[p][0] += vel[p][0];
+					pos[p][1] += vel[p][1];
+				}
+
+				width = pos.Select(x => x[0]).Max() - pos.Select(x => x[0]).Min() + 1;
+				height = pos.Select(x => x[1]).Max() - pos.Select(x => x[1]).Min() + 1;
+
+				if (height < 20)
+				{
+					var minY = pos.Select(x => x[1]).Min();
+					var maxY = pos.Select(x => x[1]).Max();
+					var minX = pos.Select(x => x[0]).Min();
+					var maxX = pos.Select(x => x[0]).Max();
+
+					for (var y = minY - 1; y <= maxY + 1; y++)
+					{
+						for (var x = minX - 1; x <= maxX + 1; x++)
+						{
+							if (pos.Select(p => p[0] + "," + p[1]).Contains(x + "," + y))
+							{
+								Console.Write("#");
+							}
+							else
+							{
+								Console.Write(".");
+							}
+						}
+						Console.WriteLine();
+					}
+					time = i;
+				}
+			}
+
+			return time;
+		}
+
 		
 
 		// Tools ================================================================
@@ -128,6 +190,11 @@ namespace _2018
 				if (diff > 1) return false;
 			}
 			return true;
+		}
+
+		private static void DisplayStars(List<int[]> pos, int width, int height)
+		{
+
 		}
 		
     }

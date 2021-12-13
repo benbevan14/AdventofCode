@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(MinecartMadness2(@"data/13.txt"));
+            Console.WriteLine(Marbles(@"data/9.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -112,6 +112,76 @@ namespace _2018
 			}
 
 			return count;
+		}
+
+		private static long Marbles(string path)
+		{
+			var input = File.ReadAllText(path).Split(" ");
+			var players = int.Parse(input[0]);
+			var marbles = int.Parse(input[6]) * 100;
+
+			var circle = new List<int>(new int[] { 0, 1 });
+
+			// keep track of each player's score
+			var scores = new long[players];
+
+			// keep track of the current position
+			var ptr = 1;
+
+			// keep track of the current player
+			var player = 2;
+
+			// loop through marbles
+			for (var i = 2; i <= marbles; i++)
+			{
+				if (i % 100000 == 0) Console.WriteLine(i);
+				if (player > players) player = 1;
+
+				// multiples of 23 are kept as scoring marbles
+				if (i % 23 == 0)
+				{
+					// remove this marble and add it to the player's score
+					scores[player - 1] += i;
+					// Console.WriteLine("Adding " + i + " to player " + player);
+
+					// move the pointer to the marble 7 positions ccw
+					ptr -= 7;
+					if (ptr < 0) ptr += circle.Count;
+					scores[player - 1] += circle[ptr];
+					// Console.WriteLine("Adding " + circle[ptr] + " to player " + player);
+					circle.RemoveAt(ptr);
+				}
+				// otherwise, insert the marble into the circle
+				else
+				{
+					// move the pointer to two places clockwise of the current position
+					ptr += 2;
+					if (ptr > circle.Count) ptr -= circle.Count;
+
+					circle.Insert(ptr, i);
+				}
+
+				// Console.ForegroundColor = ConsoleColor.White;
+				// Console.Write(player + ": ");
+				// for (var j = 0; j < circle.Count; j++)
+				// {
+				// 	if (j == ptr) 
+				// 	{
+				// 		Console.ForegroundColor = ConsoleColor.Yellow;
+				// 		Console.Write(circle[j].ToString().PadRight(3));
+				// 	}
+				// 	else 
+				// 	{
+				// 		Console.ForegroundColor = ConsoleColor.White;
+				// 		Console.Write(circle[j].ToString().PadRight(3));
+				// 	}
+				// }
+				// Console.WriteLine();
+
+				player++;
+			}
+
+			return scores.Max();
 		}
 
 		private static int MoveStars(string path)

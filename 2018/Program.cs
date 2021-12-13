@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(FuelGrid());
+            Console.WriteLine(PlantPots(@"data/12.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -237,6 +237,67 @@ namespace _2018
 			return topLeft[0] + "," + topLeft[1] + "," + bestSize;
 		}
 
+		private static int PlantPots(string path)
+		{
+			var input = File.ReadAllLines(path).Where(x => x != string.Empty);
+			var state = input.First().Split(" ")[2];
+			var conditions = input.Skip(1).ToArray();
+
+			var pots = new char[200];
+			for (var i = 0; i < pots.Length; i++) pots[i] = '.';
+
+			// initialise the starting pots in the middle of the array
+			for (var i = 0; i < state.Length; i++)
+			{
+				pots[i + 60] = state[i];
+			}
+
+			Console.Write(" 0:");
+			Console.WriteLine(string.Join("", pots));
+
+			// for each generation
+			for (var gen = 1; gen < 21; gen++)
+			{
+				// initialise new array for next generation
+				var newPots = new char[pots.Length]; 
+
+				newPots[0] = '.';
+				newPots[1] = '.';
+				newPots[newPots.Length - 1] = '.';
+				newPots[newPots.Length - 2] = '.';
+
+				// for each pot, excluding those at the very ends
+				for (var pot = 2; pot < pots.Length - 2; pot++)
+				{
+					// check against each condition
+					foreach (var c in conditions.Select(x => x.Split(" => ")))
+					{
+						if (CheckSurroundingPots(pots, pot, c[0]))
+						{
+							newPots[pot] = char.Parse(c[1]);
+							break;
+						}
+						else
+						{
+							newPots[pot] = '.';
+						}
+					}
+				}
+
+				pots = newPots;
+				Console.Write(gen.ToString().PadLeft(2) + ":");
+				Console.WriteLine(string.Join("", pots));
+			}
+
+			var total = 0;
+			for (var i = 0; i < pots.Length; i++)
+			{
+				if (pots[i] == '#') total += (i - 60);
+			}
+
+			return total;
+		}
+
 		
 
 		// Tools ================================================================
@@ -250,6 +311,16 @@ namespace _2018
 				if (a[i] != b[i]) diff++;
 				if (diff > 1) return false;
 			}
+			return true;
+		}
+
+		private static bool CheckSurroundingPots(char[] pots, int current, string conditions)
+		{
+			for (var i = 0; i < 5; i++)
+			{
+				if (pots[current + i - 2] != conditions[i]) return false;
+			}
+
 			return true;
 		}
     }

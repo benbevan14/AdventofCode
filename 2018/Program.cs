@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(MinecartMadness(@"data/13.txt"));
+            Console.WriteLine(MinecartMadness2(@"data/13.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -356,6 +356,80 @@ namespace _2018
 			return null;
 		}
 
+		private static string MinecartMadness2(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			// grid dimensions
+			var width = input[0].Length;
+			var height = input.Length;
+
+			// list of carts
+			var carts = new List<Cart>();
+
+			// initialise and fill grid
+			var grid = new char[height, width];
+			for (var row = 0; row < height; row++)
+			{
+				for (var col = 0; col < width; col++)
+				{
+					var c = input[row][col];
+					// if a cart was found, replace the character in the grid and add a new cart to the list
+					if (c == '^' || c == '>' || c == 'v' || c == '<')
+					{
+						if (c == '^' || c == 'v') grid[row, col] = '|';
+						else grid[row, col] = '-';
+						carts.Add(new Cart(col, row, c));
+					}
+					// otherwise just copy it from the input
+					else grid[row, col] = input[row][col];
+				}
+			}
+
+			// DisplayMinecarts(grid, carts);
+			var collisions = 0;
+
+			while (collisions < 8)
+			{
+				// sort the carts
+				carts.OrderBy(x => x.X).ThenBy(x => x.Y);
+
+				// move each cart, starting on the top row left -> right
+				for (var i = 0; i < carts.Count; i++)
+				{
+					// don't move carts that have already crashed
+					if (carts[i].Crashed) continue;
+
+					// move the cart
+					carts[i].Move(grid);
+
+					// after the cart has moved, check it against all the others
+					for (var j = 0; j < carts.Count; j++)
+					{
+						// don't check the cart against itself
+						if (i == j) continue;
+
+						// if the carts are on the same spot they've crashed
+						if (carts[i].X == carts[j].X && carts[i].Y == carts[j].Y)
+						{
+							// DisplayMinecarts(grid, carts);
+							Console.WriteLine(carts[i].X + "," + carts[i].Y);
+							carts[i].Crashed = true;
+							carts[j].Crashed = true;
+							collisions++;
+						}
+					}
+				}
+
+				// remove carts that have crashed from the list
+				carts = carts.Where(x => !x.Crashed).ToList();
+			}
+			
+			// DisplayMinecarts(grid, carts);
+
+			return carts[0].X + "," + carts[0].Y;
+		}
+
 		
 
 		// Tools ================================================================
@@ -414,6 +488,7 @@ namespace _2018
 		public int Y { get; set; }
 		public char Direction { get; set; }
 		public int Choice { get; set; }
+		public bool Crashed { get; set; }
 		private Dictionary<char, char> Mappings { get; set; }
 
 		public Cart(int X, int Y, char Direction)
@@ -422,6 +497,7 @@ namespace _2018
 			this.Y = Y;
 			this.Direction = Direction;
 			this.Choice = 0;
+			this.Crashed = false;
 			this.Mappings = new Dictionary<char, char>
 			{
 				{ '^', '>' },

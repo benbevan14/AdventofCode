@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(Marbles(@"data/9.txt"));
+            Console.WriteLine(GoblinsVElves(@"data/15.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -498,6 +498,28 @@ namespace _2018
 			// DisplayMinecarts(grid, carts);
 
 			return carts[0].X + "," + carts[0].Y;
+		}
+
+		public static int GoblinsVElves(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			// create the map
+			var map = new Map(input.Count(), input[0].Length);
+
+			// fill the map
+			map.FillGrid(File.ReadAllText(path).Replace("\r\n", ""));
+
+			// show the map
+			map.Show();
+
+			// test retrieving the goblins
+			var goblins = map.GetUnits('G');
+			var elves = map.GetUnits('E');
+
+			
+			
+			return 0;
 		}
 
 		

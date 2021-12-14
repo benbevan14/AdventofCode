@@ -9,7 +9,7 @@ namespace _2018
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(GoblinsVElves(@"data/15.txt"));
+            Console.WriteLine(GoblinsVElves(@"data/test.txt"));
         }
 
 		private static int RepeatFrequency(string path)
@@ -513,10 +513,32 @@ namespace _2018
 			// show the map
 			map.Show();
 
-			// test retrieving the goblins
-			var goblins = map.GetUnits('G');
-			var elves = map.GetUnits('E');
+			// retrieve units
+			var units = map.GetUnits();
+			var numGoblins = map.GetUnits('G').Count;
+			var numElves = map.GetUnits('E').Count;
 
+			// // loop through all units in reading order
+			// foreach (var unit in units)
+			// {
+			// 	// ignore dead units
+			// 	if (unit.IsDead) continue;
+
+			// 	// get opposing units, they have a different type
+			// 	var enemies = units.Where(x => !x.IsDead && x.Type != unit.Type);
+
+			// 	// find all spots adjacent to enemies
+
+			// }
+
+			var current = units.First();
+			var enemies = units.Where(x => x.Type != current.Type).ToList();
+			var adjacent = current.SelectMove(map, enemies).OrderBy(x => x[1]).ThenBy(x => x[0]);
+
+			foreach (var a in adjacent)
+			{
+				Console.WriteLine(a[0] + "," + a[1]);
+			}
 			
 			
 			return 0;

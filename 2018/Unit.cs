@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class Unit : ITile
 {
 	public char Type { get; set; }
@@ -19,9 +21,15 @@ public class Unit : ITile
 		IsDead = false;
 	}
 
-	public int[] SelectMove(char[,] grid)
+	public List<int[]> SelectMove(Map m, List<Unit> enemies)
 	{
-		// var enemies = 
-		return new int[] {};
+		var adjacent = new List<int[]>();
+		
+		foreach (var enemy in enemies)
+		{
+			adjacent.AddRange(m.GetAdjacent(enemy.Position[0], enemy.Position[1]));
+		}
+
+		return adjacent;
 	}
 }

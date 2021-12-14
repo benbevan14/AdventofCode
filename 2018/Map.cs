@@ -15,6 +15,32 @@ public class Map
 		return Grid[y, x];
 	}
 
+	public List<int[]> GetAdjacent(int x, int y)
+	{
+		var directions = new int[4][]
+		{
+			new int[] { 1, 0 },
+			new int[] { 0, 1 },
+			new int[] { -1, 0 },
+			new int[] { 0, -1 }
+		};
+
+		var adjacent = new List<int[]>();
+		foreach (var dir in directions)
+		{
+			var dx = x + dir[0];
+			var dy = y + dir[1];
+			// check if the point is in the grid
+			if (dx >= 0 && dx < Grid.GetLength(1) && dy >= 0 && dy < Grid.GetLength(0))
+			{
+				// if the spot is empty, add it to the list
+				if (GetTile(dx, dy) == null) adjacent.Add(new int[] { dx, dy });
+			}
+		}
+
+		return adjacent;
+	}
+
 	public void Show()
 	{
 		for (var row = 0; row < Grid.GetLength(0); row++)
@@ -55,6 +81,21 @@ public class Map
 		}
 	}
 
+	public List<Unit> GetUnits()
+	{
+		var units = new List<Unit>();
+
+		for (var row = 0; row < Grid.GetLength(0); row++)
+		{
+			for (var col = 0; col < Grid.GetLength(1); col++)
+			{
+				if (Grid[row, col]?.Type == 'E' || Grid[row, col]?.Type == 'G') units.Add((Unit) Grid[row, col]);
+			}
+		}
+
+		return units;
+	}
+	
 	public List<Unit> GetUnits(char type)
 	{
 		var units = new List<Unit>();

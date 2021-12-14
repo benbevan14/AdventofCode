@@ -54,6 +54,9 @@ namespace _2021
 				case "13":
 					Console.WriteLine(args[1] == "1" ? FoldOrigami(path) : 0);
 					break;
+				case "14":
+					Console.WriteLine(args[1] == "1" ? Polymerise(path) : BigPolymer(path));
+					break;
 			}
         }
 
@@ -1025,6 +1028,145 @@ namespace _2021
 			}
 
 			return dotCounter;
+		}
+
+		private static int Polymerise(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			var polymer = input.First();
+			var pairs = new Dictionary<string, string>();
+
+			foreach (var p in input.Skip(2).Select(x => x.Split(" -> ")))
+			{
+				pairs[p[0]] = p[1];
+			}
+
+			for (var step = 1; step <= 10; step++)
+			{
+				var insertions = 0;
+				var sb = new StringBuilder(polymer);
+				for (var i = 0; i < polymer.Length - 1; i++)
+				{
+					// if the current character and the next are a pair, insert the output
+					if (pairs.TryGetValue(polymer.Substring(i, 2), out var output))
+					{
+						sb.Insert(i + 1 + insertions, output);
+						insertions++;
+					}
+				}
+				polymer = sb.ToString();
+				Console.WriteLine("step " + step + ": " + polymer.Length);
+			}
+
+			// count occurrences of each character
+			var occurrences = new Dictionary<char, int>();
+			foreach (var c in polymer)
+			{
+				if (occurrences.ContainsKey(c)) occurrences[c] = occurrences[c] + 1;
+				else occurrences[c] = 1;
+			}
+
+			return occurrences.Values.Max() - occurrences.Values.Min();
+		}
+
+		public static long BigPolymer(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			// starting polymer
+			var polymer = input.First();
+			// keep track of what each pair produces
+			var output = new Dictionary<string, string>();
+
+			foreach (var p in input.Skip(2).Select(x => x.Split(" -> ")))
+			{
+				output[p[0]] = p[1];
+			}
+
+			// keep track of how many of each pair exists
+			var pairs = new Dictionary<string, long>();
+
+			// initialise pairs
+			for (var i = 0; i < polymer.Length - 1; i++)
+			{
+				var pair = polymer.Substring(i, 2);
+				if (pairs.ContainsKey(pair)) pairs[pair]++;
+				else pairs[pair] = 1;
+			}
+
+			// step through
+			for (var step = 1; step <= 40; step++)
+			{
+				// split each pair and add new pairs formed
+				// keep track of pairs to add
+				var toAdd = new Dictionary<string, long>();
+				// keep track of pairs to remove
+				var toRemove = new Dictionary<string, long>();
+
+				// for each pair, split it and keep track of what to add and remove
+				foreach (var p in pairs)
+				{
+					var k = p.Key;
+					var v = p.Value;
+					var replace = output[k];
+					var left = k[0] + replace;
+					var right = replace + k[1];
+
+					if (toAdd.ContainsKey(left)) toAdd[left] += v;
+					else toAdd[left] = v;
+
+					if (toAdd.ContainsKey(right)) toAdd[right] += v;
+					else toAdd[right] = v;
+
+					if (toRemove.ContainsKey(k)) toRemove[k] += v;
+					else toRemove[k] = v;
+				}
+
+				// add pairs
+				foreach (var p in toAdd)
+				{
+					var k = p.Key;
+					var v = p.Value;
+					if (pairs.ContainsKey(k)) pairs[k] += v;
+					else pairs[k] = v;
+				}
+
+				// remove pairs
+				foreach (var p in toRemove)
+				{
+					var k = p.Key;
+					var v = p.Value;
+					if (pairs.ContainsKey(k)) pairs[k] -= v;
+					else pairs[k] = v;
+				}
+
+				// remove any empty keys
+				var keys = pairs.Keys.ToList();
+				for (var i = 0; i < keys.Count; i++)
+				{
+					if (pairs[keys[i]] <= 0) pairs.Remove(keys[i]);
+				}
+			}
+
+			// count the occurences of each character
+			var counts = new Dictionary<char, long>();
+			foreach (var p in pairs)
+			{
+				var k = p.Key;
+				var v = p.Value;
+
+				if (counts.ContainsKey(k[0])) counts[k[0]] += v;
+				else counts[k[0]] = v;
+
+				if (counts.ContainsKey(k[1])) counts[k[1]] += v;
+				else counts[k[1]] = v;
+			}
+
+			var max = (counts.Values.Max() + 1) / 2; 
+			var min = (counts.Values.Min() + 1) / 2;
+
+			return max - min;
 		}
 
 

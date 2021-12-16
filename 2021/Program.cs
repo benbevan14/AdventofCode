@@ -61,7 +61,7 @@ namespace _2021
 					Console.WriteLine(args[1] == "1" ? Pathfinding(path) : 0);
 					break;
 				case "16":
-					Console.WriteLine(args[1] == "1" ? DecodePackets(path) : 0);
+					Console.WriteLine(args[1] == "1" ? DecodePackets(path) : EvaluatePackets(path));
 					break;
 			}
         }
@@ -1217,7 +1217,6 @@ namespace _2021
 			return versionCount;
 		}
 
-		// returns the length of the decoded packet
 		private static int DecodePacket(string packet, ref int versionCount)
 		{
 			Console.WriteLine("Parsing packet: " + (packet.Length > 99 ? packet.Substring(0, 100) : packet));
@@ -1295,6 +1294,123 @@ namespace _2021
 				
 				// we've parsed a literal packet, so return its total length
 				return ptr;
+			}
+		}
+
+		public static long EvaluatePackets(string path)
+		{
+			var input = File.ReadAllText(path);
+
+			var binary = HexToBinary(input);
+
+			EvaluatePacket(binary, out long output);
+
+			return output;
+		}
+
+		private static int EvaluatePacket(string packet, out long value)
+		{
+			var version = Convert.ToInt32(packet.Substring(0, 3), 2);
+			var type = Convert.ToInt32(packet.Substring(3, 3), 2);
+			var lengthType = int.Parse(packet.Substring(6, 1));
+
+			if (type == 4)
+			{
+				var sb = new StringBuilder();
+				var check = true;
+				// start after the type label
+				var ptr = 6;
+				while (check)
+				{
+					// if the group of 5 starts with a zero, it's the last one
+					if (packet[ptr] == '0') check = false;
+					// otherwise add the next 4 to the stringbuilder
+					sb.Append(packet.Substring(ptr + 1, 4));
+					// move the pointer to the next section
+					ptr += 5;
+				}
+				value = Convert.ToInt64(sb.ToString(), 2);
+				return ptr;
+			}
+			else
+			{
+				// get the length of the evaluated sub-packet(s)
+				var length = EvaluateSubPacket(packet, out List<long> packetValues);
+
+				switch (type)
+				{
+					case 0: // sum values of sub-packets
+						value = packetValues.Sum();
+						break;
+
+					case 1: // multiply values of sub-packets
+						value = packetValues.Aggregate(1L, (x, y) => x * y);
+						break;
+
+					case 2: // minimum value of sub-packets
+						value = packetValues.Min();
+						break;
+
+					case 3: // maximum value of sub-packets
+						value = packetValues.Max();
+						break;
+
+					case 5: // greater than. i.e p1 > p2 ? 1 : 0
+						value = packetValues[0] > packetValues[1] ? 1 : 0;
+						break;
+						
+					case 6: // less than. i.e p1 < p2 ? 1 : 0
+						value = packetValues[0] < packetValues[1] ? 1 : 0;
+						break;
+
+					case 7: // equal to. i.e p1 == p2 ? 1 : 0
+						value = packetValues[0] == packetValues[1] ? 1 : 0;
+						break;
+
+					default:
+						value = 0;
+						break;
+				}
+
+				return length;
+			}
+		}
+
+		private static int EvaluateSubPacket(string packet, out List<long> values)
+		{
+			var packetValues = new List<long>();
+			var length = 0;
+			var lengthType = int.Parse(packet.Substring(6, 1));
+
+			if (lengthType == 0)
+			{
+				length = Convert.ToInt32(packet.Substring(7, 15), 2);
+				var parsed = 0;
+				while (parsed < length)
+				{
+					// each time we evaluate a packet, add its length to the total, and add its value to values
+					parsed += EvaluatePacket(packet.Substring(22 + parsed), out long packetValue);
+					packetValues.Add(packetValue);
+				}
+
+				values = packetValues;
+				return 22 + length;
+			}
+			else
+			{
+				var completed = 0;
+				var subPackets = Convert.ToInt32(packet.Substring(7, 11), 2);
+
+				while (completed < subPackets)
+				{
+					// add to the length we've parsed, and output the value of the packet
+					length += EvaluatePacket(packet.Substring(18 + length), out long packetValue);
+					packetValues.Add(packetValue);
+					completed++;
+				}
+
+				values = packetValues;
+				return 18 + length;
 			}
 		}
 

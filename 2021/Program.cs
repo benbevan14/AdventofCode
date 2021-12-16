@@ -57,6 +57,12 @@ namespace _2021
 				case "14":
 					Console.WriteLine(args[1] == "1" ? Polymerise(path) : BigPolymer(path));
 					break;
+				case "15":
+					Console.WriteLine(args[1] == "1" ? Pathfinding(path) : 0);
+					break;
+				case "16":
+					Console.WriteLine(args[1] == "1" ? DecodePackets(path) : 0);
+					break;
 			}
         }
 
@@ -1169,6 +1175,129 @@ namespace _2021
 			return max - min;
 		}
 
+		public static int Pathfinding(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var rows = input.Count();
+			var cols = input[0].Length;
+
+			var grid = new int[rows, cols];
+			var map = new int[rows, cols];
+
+			// populate grid
+			for (var row = 0; row < rows; row++)
+			{
+				for (var col = 0; col < cols; col++)
+				{
+					grid[row, col] = int.Parse(input[row][col].ToString());
+					Console.Write(grid[row, col]);
+				}
+				Console.WriteLine();
+			}
+
+
+
+
+
+			return 0;
+		}
+
+		public static int DecodePackets(string path)
+		{
+			var input = File.ReadAllText(path);
+
+			var versionCount = 0;
+
+			var binary = HexToBinary(input);
+
+			Console.WriteLine(binary.Substring(0, 100));
+
+			DecodePacket(binary, ref versionCount);
+
+			return versionCount;
+		}
+
+		// returns the length of the decoded packet
+		private static int DecodePacket(string packet, ref int versionCount)
+		{
+			Console.WriteLine("Parsing packet: " + (packet.Length > 99 ? packet.Substring(0, 100) : packet));
+
+			var version = Convert.ToInt32(packet.Substring(0, 3), 2);
+			var type = Convert.ToInt32(packet.Substring(3, 3), 2);
+
+			versionCount += version;
+
+			// we only care about the version total at the moment
+			if (type != 4)
+			{
+				var lengthType = int.Parse(packet.Substring(6, 1));
+
+				// the next 15 bits give the total length of subpackets
+				if (lengthType == 0)
+				{
+					var length = Convert.ToInt32(packet.Substring(7, 15), 2);
+
+					// we now have a length of packets to parse
+					// keep track of how much of this length has been parsed
+					var parsed = 0;
+					Console.WriteLine("Starting to parse " + length + " bits vvvv");
+					while (parsed < length)
+					{
+						Console.WriteLine("Parsed " + parsed + " bits out of " + length + " total");
+						parsed += DecodePacket(packet.Substring(22 + parsed), ref versionCount);
+					}
+					Console.WriteLine("Finished parsing " + length + " bits ^^^^");
+
+					// return the total length of bits parsed
+					return 22 + length;
+				}
+				// the next 11 bits give the number of immediate sub-packets
+				else
+				{
+					var subPackets = Convert.ToInt32(packet.Substring(7, 11), 2);
+					Console.WriteLine("This packet contains " + subPackets + " sub-packets");
+
+					// keep track of the number of sub-packets parsed
+					var completed = 0;
+					// keep track of the length parsed
+					var parsed = 0;
+
+					while (completed < subPackets)
+					{
+						Console.WriteLine("Parsing " + (completed + 1) + " out of " + subPackets + " sub-packets");
+						parsed += DecodePacket(packet.Substring(18 + parsed), ref versionCount);
+						completed++;
+					}
+
+					// return the total length of bits parsed
+					return 18 + parsed;
+				}
+			}
+			else
+			{
+				var sb = new StringBuilder();
+				var check = true;
+				// start after the type label
+				var ptr = 6;
+				while (check)
+				{
+					// if the group of 5 starts with a zero, it's the last one
+					if (packet[ptr] == '0') check = false;
+
+					// otherwise add the next 4 to the stringbuilder
+					sb.Append(packet.Substring(ptr + 1, 4));
+
+					ptr += 5;
+				}
+
+				// Console.WriteLine("Finished parsing a literal packet with value " + Convert.ToInt32(sb.ToString(), 2));
+				Console.WriteLine("This packet had a length of " + ptr);
+				
+				// we've parsed a literal packet, so return its total length
+				return ptr;
+			}
+		}
+
 
 
 
@@ -1365,6 +1494,11 @@ namespace _2021
 					}	
 				}
 			}
+		}
+
+		private static string HexToBinary(string hex)
+		{
+			return String.Join("", hex.Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0')));
 		}
     }
 }

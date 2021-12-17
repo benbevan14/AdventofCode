@@ -12,7 +12,7 @@ namespace _2015
     {
         static void Main(string[] args)
         {
-			Console.WriteLine(HasStraight("abdeghi"));
+			Console.WriteLine(FindSue(@"Data/16.txt"));
         }
 
 		// Problem 3:1
@@ -460,7 +460,72 @@ namespace _2015
 			return result;
 		}
 	
-	
+		static int FindSue(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var sues = new Dictionary<int, Dictionary<string, int>>();
+
+			foreach (var line in input)
+			{
+				var words = line.Split(" ");
+				var key = int.Parse(words[1].TrimEnd(':'));
+				var items = new Dictionary<string, int>();
+
+				for (var i = 0; i < 6; i += 2)
+				{	
+					var item = words[i + 2].TrimEnd(':');
+					var amount = int.Parse(words[i + 3].TrimEnd(','));
+					items[item] = amount;
+				}
+
+				sues[key] = items;
+			}
+
+			var required = new Dictionary<string, int>
+			{
+				{ "children", 3 },
+				{ "cats", 7 },
+				{ "samoyeds", 2 },
+				{ "pomeranians", 3 },
+				{ "akitas", 0 },
+				{ "vizslas", 0 },
+				{ "goldfish", 5 },
+				{ "trees", 3 },
+				{ "cars", 2 },
+				{ "perfumes", 1 }
+			};
+
+			var list = Enumerable.Range(1, 500);
+			// foreach (var req in required)
+			// {
+			// 	list = list.Where(x => (sues[x].ContainsKey(req.Key) && sues[x][req.Key] == req.Value) || !sues[x].ContainsKey(req.Key));
+			// }
+
+			foreach (var item in required.Select((value, i) => new { i, value }))
+			{
+				var pair = item.value;
+				if (item.i == 1 || item.i == 7)
+				{
+					list = list
+						.Where(x => (sues[x].ContainsKey(pair.Key) && sues[x][pair.Key] > pair.Value) || !sues[x].ContainsKey(pair.Key));
+				}
+				else if (item.i == 3 || item.i == 6)
+				{
+					list = list
+						.Where(x => (sues[x].ContainsKey(pair.Key) && sues[x][pair.Key] < pair.Value) || !sues[x].ContainsKey(pair.Key));
+				}
+				else
+				{
+					list = list
+						.Where(x => (sues[x].ContainsKey(pair.Key) && sues[x][pair.Key] == pair.Value) || !sues[x].ContainsKey(pair.Key));
+				}
+			}
+
+			Console.WriteLine(list.Count());
+			Console.WriteLine(list.First());
+
+			return 0;
+		}	
 
 		// static string NewPassword(string input)
 		// {

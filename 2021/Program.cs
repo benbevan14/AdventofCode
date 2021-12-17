@@ -63,6 +63,9 @@ namespace _2021
 				case "16":
 					Console.WriteLine(args[1] == "1" ? DecodePackets(path) : EvaluatePackets(path));
 					break;
+				case "17":
+					Console.WriteLine(args[1] == "1" ? TestProjectiles(path) : UniqueTrajectories(path));
+					break;
 			}
         }
 
@@ -1412,6 +1415,80 @@ namespace _2021
 				values = packetValues;
 				return 18 + length;
 			}
+		}
+
+		public static int TestProjectiles(string path)
+		{
+			var input = File.ReadAllText(path).Split(" ");
+			var xRange = input[2].Substring(2).TrimEnd(',').Split("..").Select(int.Parse).ToArray();
+			var yRange = input[3].Substring(2).Split("..").Select(int.Parse).ToArray();
+
+			var highest = -10000;
+
+			for (var xVel = 0; xVel < 300; xVel++)
+			{
+				for (var yVel = -300; yVel < 300; yVel++)
+				{
+					var height = FireProjectile(xVel, yVel, xRange, yRange);
+					if (height > highest) highest = height;
+				}
+			}
+
+			return highest;
+		}
+
+		public static int FireProjectile(int xVel, int yVel, int[] xRange, int[] yRange)
+		{
+			var pos = new int[2] { 0, 0 };
+
+			var highest = -1000;
+			var hit = false;
+			
+			while (pos[0] <= xRange[1] && pos[1] >= yRange.Min())
+			{
+				pos[0] += xVel;
+				pos[1] += yVel;
+
+				if (pos[1] > highest) highest = pos[1];
+
+				// check if the projectile hits the target
+				if (pos[0] >= xRange[0] && pos[0] <= xRange[1] && pos[1] >= yRange[0] && pos[1] <= yRange[1])
+				{
+					hit = true;
+					return highest;
+				}
+
+				// change xVel 1 towards 0
+				if (xVel > 0) xVel--;
+				
+				// change yVel due to gravity
+				yVel--;
+			}
+
+			if (!hit) return -10000;
+			else return highest;
+		}
+
+		private static int UniqueTrajectories(string path)
+		{
+			var input = File.ReadAllText(path).Split(" ");
+			var xRange = input[2].Substring(2).TrimEnd(',').Split("..").Select(int.Parse).ToArray();
+			var yRange = input[3].Substring(2).Split("..").Select(int.Parse).ToArray();
+
+			var unique = new HashSet<string>();
+
+			for (var xVel = 0; xVel < 2000; xVel++)
+			{
+				for (var yVel = -2000; yVel < 2000; yVel++)
+				{
+					if (FireProjectile(xVel, yVel, xRange, yRange) != -10000)
+					{
+						unique.Add(xVel + "," + yVel);
+					}
+				}
+			}
+
+			return unique.Count;
 		}
 
 

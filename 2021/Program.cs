@@ -66,6 +66,9 @@ namespace _2021
 				case "17":
 					Console.WriteLine(args[1] == "1" ? TestProjectiles(path) : UniqueTrajectories(path));
 					break;
+				case "18":
+					Console.WriteLine(args[1] == "1" ? Reduce(path) : 0);
+					break;
 			}
         }
 
@@ -1489,6 +1492,74 @@ namespace _2021
 			}
 
 			return unique.Count;
+		}
+
+		private static int Reduce(string path)
+		{
+			var input = File.ReadAllLines(path);
+
+			var number = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]";
+
+			// var explode = true;
+			// while (explode)
+			// {
+			// 	var index = CheckExplode(number);
+			// 	if (index != -1) 
+			// 	{
+			// 		number = ExplodeNumber(number, index);	
+			// 	}
+			// 	else explode = false;
+			// }
+
+			var index = CheckExplode(number);
+			Console.WriteLine("Index is " + index);
+			var s = ExplodeNumber(number, index);
+
+			return 0;
+		}
+
+		private static int CheckExplode(string number)
+		{	
+			var bracket = 0;
+			for (var i = 0; i < number.Length; i++)
+			{
+				if (number[i] == '[') bracket++;
+				else if (number[i] == ']') bracket--;
+
+				if (bracket > 4) return i;
+			}
+
+			// not found
+			return -1;
+		}
+
+		// return a new exploded string from number starting at i
+		private static string ExplodeNumber(string number, int start)
+		{
+			// find the matching bracket for this pair
+			var end = start;
+			for (var i = start; i < number.Length; i++)
+			{
+				if (number[i] == ']')
+				{
+					end = i;
+					break;
+				}
+			}
+
+			var pair = number.Substring(start + 1, end - start).Split(",").Select(int.Parse).ToArray();
+			
+			
+
+
+			return "";
+		}
+
+		private static List<int> GetSnailDigits(string number)
+		{
+			var reduced = number.Replace("[", "").Replace("]", "");
+
+			return reduced.Split(",").Select(int.Parse).ToList();
 		}
 
 

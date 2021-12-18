@@ -1499,34 +1499,65 @@ namespace _2021
 			var input = File.ReadAllLines(path);
 
 			var number = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]";
+			var snail = GetSnailDigits(number);
+			var explode = CheckExplode(snail);
 
-			// var explode = true;
-			// while (explode)
+			while (explode > 0)
+			{
+				snail = ExplodeNumber(snail, explode);
+				explode = CheckExplode(snail);
+			}
+
+			var split = CheckSplit(snail);
+
+			while (split > 0)
+			{
+				snail = SplitSnail(snail, split);
+				split = CheckSplit(snail);
+			}
+
+			explode = CheckExplode(snail);
+
+			while (explode > 0)
+			{
+				snail = ExplodeNumber(snail, explode);
+				explode = CheckExplode(snail);
+			}
+
+			// while (explode > 0 || split > 0)
 			// {
-			// 	var index = CheckExplode(number);
-			// 	if (index != -1) 
+			// 	while (explode > 0)
 			// 	{
-			// 		number = ExplodeNumber(number, index);	
+			// 		snail = ExplodeNumber(snail, explode);
+			// 		explode = CheckExplode(snail);
+			// 		split = CheckSplit(snail);
 			// 	}
-			// 	else explode = false;
+
+			// 	while (split > 0)
+			// 	{
+			// 		snail = SplitSnail(snail, split);
+			// 		explode = CheckExplode(snail);
+			// 		split = CheckSplit(snail);
+			// 	}
+
+			// 	explode = CheckExplode(snail);
+			// 	split = CheckSplit(snail);
 			// }
 
-			var index = CheckExplode(number);
-			Console.WriteLine("Index is " + index);
-			var s = ExplodeNumber(number, index);
+			Console.WriteLine(SnailToString(snail));
 
 			return 0;
 		}
 
-		private static int CheckExplode(string number)
+		private static int CheckExplode(List<int> number)
 		{	
 			var bracket = 0;
-			for (var i = 0; i < number.Length; i++)
+			for (var i = 0; i < number.Count; i++)
 			{
-				if (number[i] == '[') bracket++;
-				else if (number[i] == ']') bracket--;
+				if (number[i] == -3) bracket++;
+				else if (number[i] == -2) bracket--;
 
-				if (bracket > 4) return i;
+				if (bracket > 4) return i + 1;
 			}
 
 			// not found
@@ -1534,32 +1565,113 @@ namespace _2021
 		}
 
 		// return a new exploded string from number starting at i
-		private static string ExplodeNumber(string number, int start)
+		private static List<int> ExplodeNumber(List<int> snail, int start)
 		{
-			// find the matching bracket for this pair
-			var end = start;
-			for (var i = start; i < number.Length; i++)
+			var left = snail[start];
+			var right = snail[start + 2];
+			// Console.WriteLine("left: " + left);
+			// Console.WriteLine("right: " + right); 
+
+			// add the left number to the next left
+			for (var l = start - 1; l >= 0; l--)
 			{
-				if (number[i] == ']')
+				if (snail[l] >= 0)
 				{
-					end = i;
+					snail[l] += left;
+					break;
+				}
+			}
+			
+			// add the right number to the next right
+			for (var r = start + 3; r < snail.Count; r++)
+			{
+				if (snail[r] >= 0)
+				{
+					snail[r] += right;
 					break;
 				}
 			}
 
-			var pair = number.Substring(start + 1, end - start).Split(",").Select(int.Parse).ToArray();
-			
-			
-
-
-			return "";
+			// remove the pair and replace it with a zero
+			snail.RemoveRange(start - 1, 5);
+			snail.Insert(start - 1, 0);
+			return snail;
 		}
 
-		private static List<int> GetSnailDigits(string number)
+		private static int CheckSplit(List<int> snail)
 		{
-			var reduced = number.Replace("[", "").Replace("]", "");
+			for (var i = 0; i < snail.Count; i++)
+			{
+				if (snail[i] > 9) return i;
+			}
+			
+			// not found
+			return -1;
+		}
 
-			return reduced.Split(",").Select(int.Parse).ToList();
+		private static List<int> SplitSnail(List<int> snail, int start)
+		{
+			var left = snail[start] / 2;
+			var right = (snail[start] + 1) / 2;
+
+			// remove the number and insert the new pair
+			snail.RemoveAt(start);
+			var pair = new List<int> { -3, left, -1, right, -2 };
+			snail.InsertRange(start, pair);
+
+			return snail;
+		}
+
+		private static List<int> GetSnailDigits(string snail)
+		{
+			var res = new List<int>();
+
+			for (var i = 0; i < snail.Length; i++)
+			{
+				if (snail[i] == '[') res.Add(-3);
+				else if (snail[i] == ']') res.Add(-2);
+				else if (snail[i] == ',') res.Add(-1);
+				else 
+				{
+					if (char.IsDigit(snail[i]) && char.IsDigit(snail[i + 1]))
+					{
+						res.Add(int.Parse(snail.Substring(i, 2)));
+						i++;
+					}
+					else
+					{
+						res.Add(int.Parse(snail.Substring(i, 1)));
+					}
+				}
+			}
+
+			return res;
+		}
+
+		private static string SnailToString(List<int> snail)
+		{
+			var sb = new StringBuilder();
+
+			foreach (var item in snail)
+			{
+				switch (item)
+				{
+					case -3:
+						sb.Append("[");
+						break;
+					case -2:
+						sb.Append("]");
+						break;
+					case -1:
+						sb.Append(",");
+						break;
+					default:
+						sb.Append(item);
+						break;
+				}
+			}
+
+			return sb.ToString();
 		}
 
 

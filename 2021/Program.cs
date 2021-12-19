@@ -69,6 +69,9 @@ namespace _2021
 				case "18":
 					Console.WriteLine(args[1] == "1" ? SnailfishNumbers(path) : LargestMagnitude(path));
 					break;
+				case "19":
+					Console.WriteLine(args[1] == "1" ? LocateBeacons(path) : 0);
+					break;
 			}
         }
 
@@ -1532,7 +1535,28 @@ namespace _2021
 			return largest;
 		}
 
+		private static int LocateBeacons(string path)
+		{
+			var input = File.ReadAllText(path).Split("\r\n\r\n", StringSplitOptions.RemoveEmptyEntries);
+			
+			var scanners = new List<List<string>>();
 
+			foreach (var item in input)
+			{
+				var beacons = new List<string>();
+				foreach (var line in item.Split("\r\n").Skip(1))
+				{
+					beacons.Add(line);
+				}
+				scanners.Add(beacons);
+			}
+
+			Console.WriteLine(scanners.Skip(1).First().First());
+
+
+
+			return 0;
+		}
 
 
 

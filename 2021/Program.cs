@@ -1539,19 +1539,21 @@ namespace _2021
 		{
 			var input = File.ReadAllText(path).Split("\r\n\r\n", StringSplitOptions.RemoveEmptyEntries);
 			
-			var scanners = new List<List<string>>();
+			var scanners = new List<Scanner>();
 
-			foreach (var item in input)
+			for (var i = 0; i < input.Length; i++)
 			{
 				var beacons = new List<string>();
-				foreach (var line in item.Split("\r\n").Skip(1))
+				foreach (var line in input[i].Split("\r\n").Skip(1))
 				{
 					beacons.Add(line);
 				}
-				scanners.Add(beacons);
+				scanners.Add(new Scanner(i, beacons));
 			}
 
-			Console.WriteLine(scanners.Skip(1).First().First());
+			Console.WriteLine(scanners[0]);
+
+			
 
 
 

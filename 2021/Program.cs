@@ -72,6 +72,9 @@ namespace _2021
 				case "19":
 					Console.WriteLine(args[1] == "1" ? LocateBeacons(path) : 0);
 					break;
+				case "20":
+					Console.WriteLine(args[1] == "1" ? EnhanceImage(path) : 0);
+					break;
 			}
         }
 
@@ -1560,6 +1563,75 @@ namespace _2021
 			return 0;
 		}
 
+		private static int EnhanceImage(string path)
+		{
+			var input = File.ReadAllLines(path);
+			var algorithm = input.First();
+
+			var gridInput = input.Skip(2).ToArray();
+			var size = gridInput.Count();
+
+			var grid = new int[size, size];
+
+			for (var row = 0; row < size; row++)
+			{
+				for (var col = 0; col < size; col++)
+				{
+					grid[row, col] = gridInput[row][col] == '#' ? 1 : 0;
+				}
+			}
+
+			var secondGrid = Enhance(grid, algorithm);
+			var thirdGrid = Enhance(secondGrid, algorithm);
+
+			// DisplayGrid(thirdGrid);
+
+			var count = 0;
+			for (var row = 0; row < thirdGrid.GetLength(0); row++)
+			{
+				for (var col = 0; col < thirdGrid.GetLength(1); col++)
+				{
+					count += thirdGrid[row, col];
+				}
+			}
+
+			return count;
+		}
+
+		private static int[,] Enhance(int[,] grid, string algorithm)
+		{
+			var size = grid.GetLength(0) + 40;
+			var bigGrid = new int[size, size];
+
+			for (var row = 20; row < size - 20; row++)
+			{
+				for (var col = 20; col < size - 20; col++)
+				{
+					bigGrid[row, col] = grid[row - 20, col - 20];
+				}
+			}
+
+			var output = new int[size, size];
+
+			for (var row = 1; row < size - 1; row++)
+			{
+				for (var col = 1; col < size - 1; col++)
+				{
+					var bin = new StringBuilder();
+					for (var dy = -1; dy <= 1; dy++)
+					{
+						for (var dx = -1; dx <= 1; dx++)
+						{
+							bin.Append(bigGrid[row + dy, col + dx]);
+						}
+					}
+					output[row, col] = algorithm[Convert.ToInt32(bin.ToString(), 2)] == '#' ? 1 : 0;
+				}
+			}
+
+			return output;
+		}
+
 
 
 
@@ -1688,7 +1760,7 @@ namespace _2021
 			{
 				for (var col = 0; col < grid.GetLength(1); col++)
 				{
-					Console.Write(grid[row, col] + " ");
+					Console.Write((grid[row, col] == 1 ? "#" : ".") + " ");
 				}
 				Console.WriteLine();
 			}

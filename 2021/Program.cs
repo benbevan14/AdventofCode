@@ -75,6 +75,9 @@ namespace _2021
 				case "20":
 					Console.WriteLine(args[1] == "1" ? EnhanceImage(path) : 0);
 					break;
+				case "21":
+					Console.WriteLine(args[1] == "1" ? DiracDice(path) : 0);
+					break;
 			}
         }
 
@@ -1630,6 +1633,44 @@ namespace _2021
 			}
 
 			return output;
+		}
+
+		private static int DiracDice(string path)
+		{
+			var input = File.ReadAllLines(path).Select(x => int.Parse(x.Substring(28, 1))).ToArray();
+			var pos = new int[2] { input[0], input[1] };
+			var score = new int[2];
+			var roll = 1;
+			var player = 0;
+			var rolls = 0;
+
+			while (score[0] < 1000 && score[1] < 1000)
+			{
+				Console.Write("Player " + player + " rolls ");
+				for (var i = 0; i < 3; i++)
+				{
+					var die = (roll + i) % 100;
+					if (die == 0) die = 100;
+					Console.Write(die + " ");
+					pos[player] += die;
+				}
+
+				pos[player] = pos[player] % 10;
+				if (pos[player] == 0) pos[player] = 10;
+				Console.Write("and moves to space " + pos[player]);
+
+				score[player] += pos[player];
+				Console.WriteLine(" for a total score of " + score[player]);
+
+				roll += 3;
+				rolls += 3;
+				if (roll > 100) roll -= 100;
+				player = (player == 0) ? 1 : 0;
+			}
+
+			Console.WriteLine("Losing score: " + score[player]);
+			Console.WriteLine("Rolls: " + rolls);
+			return score[player] * rolls;
 		}
 
 

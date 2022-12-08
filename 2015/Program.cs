@@ -12,7 +12,7 @@ namespace _2015
     {
         static void Main(string[] args)
         {
-			Console.WriteLine(FindSue(@"Data/16.txt"));
+			Console.WriteLine(Medicine(@"Data/19.txt"));
         }
 
 		// Problem 3:1
@@ -45,7 +45,7 @@ namespace _2015
 				string loc = x.ToString() + "," + y.ToString();
 				int count = 0;
 				map.TryGetValue(loc, out count);
-				map[loc] = count + 1; 
+				map[loc] = count + 1;
 			}
 
 			return map.Count;
@@ -129,7 +129,7 @@ namespace _2015
 			int number = 0;
 			using (MD5 md5 = MD5.Create())
 			{
-				do 
+				do
 				{
 					number++;
 					guess = input + number.ToString();
@@ -142,7 +142,7 @@ namespace _2015
 						sb.Append(hashBytes[i].ToString("X2"));
 					}
 				} while (!sb.ToString().Substring(0, length).Equals(new String('0', length)));
-				
+
 				return number;
 			}
 		}
@@ -164,7 +164,7 @@ namespace _2015
 
 			return counter;
 		}
-		
+
 		// Problem 5:2
 		static int NicerStrings(string path)
 		{
@@ -181,7 +181,7 @@ namespace _2015
 
 			return counter;
 		}
-	
+
 		// Problem 6:1
 		static int ToggleLights(string path)
 		{
@@ -209,7 +209,7 @@ namespace _2015
 						}
 					}
 				}
-				else if (line.Substring(6, 1) == "f") 
+				else if (line.Substring(6, 1) == "f")
 				{
 					System.Console.WriteLine("Got to a turn off");
 					for (int x = startx; x <= endx; x++)
@@ -274,7 +274,7 @@ namespace _2015
 						}
 					}
 				}
-				else if (line.Substring(6, 1) == "f") 
+				else if (line.Substring(6, 1) == "f")
 				{
 					//System.Console.WriteLine("Got to a turn off");
 					for (int x = startx; x <= endx; x++)
@@ -311,60 +311,106 @@ namespace _2015
 			}
 			return sum;
 		}
-	
-		// Problem 7:1
-		static int AssembleCircuit(string path)
-		{
-			Dictionary<string, int> signals = new Dictionary<string, int>();
 
-			var instructions = File.ReadLines(path);
+        // Problem 7:1
+        static int CrossedWires(string path)
+        {
+            var signals = new Dictionary<string, int>();
+            var instructions = new Dictionary<string, string[]>();
 
-			// Get a starting point
-			foreach (string line in File.ReadAllLines(path))
-			{
-				var content = line.Split(" -> ");
+            // parse instructions
+            foreach (var line in File.ReadAllLines(path))
+            {
+                var content = line.Split(" -> ");
+                instructions[content[1]] = content[0].Split(" ");
+            }
 
-				// if the instruction is just to provide a signal to a wire
-				if (!line.Any(char.IsUpper) && !content[0].Any(char.IsLetter))
-				{
-					Console.WriteLine(line);
-					signals[content[1]] = int.Parse(content[0]);
-				}
-			}
+            // keep removing instructions as they're evaulated
+            while (instructions.Count > 0)
+            {
+                var remove = new List<string>();
+                // for each instruction, see if we have all the necessary signals
+                foreach (var inst in instructions)
+                {
+                    var key = inst.Key;
+                    var value = inst.Value;
 
-			// process instructions, add them to dictionary and remove
-			while (instructions.Count() > 0)
-			{
-				var newInstructions = new List<string>();
-				
-				foreach (var inst in instructions)
-				{
-					var args = inst.Split(" ");
-					var needed = args.Where(x => x.ToLower() == x).ToArray();
-					// If the dictionary contains all the needed values
-					if (needed.All(value => signals.Keys.Contains(value)))
-					{
-						
-					}
-					else
-					{
-						newInstructions.Add(inst);
-					}
-				}
+                    // if we can evaluate the instruction then do so
+                    if (CanEvaluate(value, signals))
+                    {
+                        // convert all strings in instruction to numbers
+                        var translated = new string[value.Length];
+                        for (var i = 0; i < translated.Length; i++)
+                        {
+                            translated[i] = signals.TryGetValue(value[i], out var sig) ? sig.ToString() : value[i];
+                        }
 
-				instructions = newInstructions;
-			}
+                        // evaluate this instruction
+                        signals[key] = Evaluate(new KeyValuePair<string, string[]>(key, translated), signals);
 
+                        // remove this instruction from the list left to evaluate
+                        remove.Add(key);
+                    }
+                }
 
+                // remove completed instructinos
+                foreach (var key in remove)
+                {
+                    instructions.Remove(key);
+                }
+            }
 
-			foreach (var p in signals)
-			{
-				Console.WriteLine(p.Key + ": " + p.Value);
-			}
+            return signals["a"];
+        }
 
-			return 0;
-		}
-	
+        static bool CanEvaluate(string[] instruction, Dictionary<string, int> signals)
+        {
+            var needed = instruction.Where(item => !int.TryParse(item, out var i) && item.ToUpper() != item)
+                                    .Where(item => !signals.Keys.Contains(item));
+
+            return !needed.Any();
+        }
+
+        // Take in a single instruction and evaluate it
+        static int Evaluate(KeyValuePair<string, string[]> instruction, Dictionary<string, int> signals)
+        {
+            var key = instruction.Key;
+            var val = instruction.Value;
+
+            // Direct copy of signal value
+            if (val.Length == 1)
+            {
+                return int.Parse(val[0]);
+            }
+
+            // All cases where length is 2
+            if (val[0] == "NOT")
+            {
+                var s = ushort.Parse(val[1]);
+                return (ushort)~s;
+            }
+
+            // All cases where length is 3
+            if (val[1] == "RSHIFT")
+            {
+                return (ushort)(ushort.Parse(val[0]) >> ushort.Parse(val[2]));
+            }
+            if (val[1] == "LSHIFT")
+            {
+                return (ushort)(ushort.Parse(val[0]) << ushort.Parse(val[2]));
+            }
+            if (val[1] == "AND")
+            {
+                return (ushort)(ushort.Parse(val[0]) & ushort.Parse(val[2]));
+            }
+            if (val[1] == "OR")
+            {
+                return (ushort)(ushort.Parse(val[0]) | ushort.Parse(val[2]));
+            }
+
+            return 0;
+        }
+
 		// Problem 8:1
 		static int Matchsticks(string path)
 		{
@@ -385,41 +431,173 @@ namespace _2015
 			return codeTotal - charTotal;
 		}
 
-		// Problem 8:2
-		static int MatchsticksReverse(string path)
-		{
-			// int codeTotal = 0;
-			int charsAdded = 0;
-			string[] test = new string[] {};
-			foreach (string line in File.ReadAllLines(path))
-			{
-				charsAdded = 0;
-				int length = line.Length;
-				//string replaced = line;
-				string replaced = Regex.Replace(line, @"""", @"\""");
-				replaced = Regex.Replace(line, "\\[^\"x\\]", @"\\");
-				//replaced = Regex.Replace(replaced, @"\", "\\\\");
-				//replaced = Regex.Replace(replaced, @"\\x[0-9a-f]{2}", "C");
+        // Problem 8:2
+        static int HowManyCharacters(string path)
+        {
+            var total = 0;
 
-				foreach (Match m in Regex.Matches(line, @""""))
-				{
-					charsAdded++;
-				}
+            foreach (var str in File.ReadAllLines(path))
+            {
+                // starts at 2 for the double quotes at each end
+                var sum = 2;
+                sum += str.Length;
+                sum += str.Count(c => c == '\\' || c == '"');
+                total += (sum - str.Length);
+            }
 
-				foreach (Match m in Regex.Matches(line, "\\[^\"x\\]"))
-				{
-					Console.WriteLine("adding a charcter for a backslash");
-					charsAdded++;
-				}
-				replaced = "\"" + replaced + "\"";
-				charsAdded += 4;
-				Console.WriteLine(line);
-				Console.WriteLine(replaced + " : " + replaced.Length);
-				Console.WriteLine("chars added: " + charsAdded);
-			}
-			return charsAdded;
-		}
-	
+            return total;
+        }
+
+        static int LookAndSay2(string input)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var current = new List<string>();
+
+                var ptr = 0;
+                while (ptr < input.Length)
+                {
+                    var ind = ptr;
+                    Console.WriteLine("Starting search at pointer: " + ptr);
+                    while (input[ind] == input[ptr])
+                    {
+                        if (++ind == input.Length) break;
+                    }
+                    current.Add((ind - ptr) + "," + input[ptr]);
+                    Console.WriteLine("Added: " + current.Last());
+                    ptr += (ind - ptr);
+                }
+            }
+
+
+            // Console.WriteLine(string.Join("__", current));
+
+            return 0;
+        }
+
+        // Problem 12:1
+        static int JsonNumbers(string input)
+        {
+            string data = File.ReadAllText(input);
+            var sum = 0;
+
+            foreach (var match in Regex.Matches(data, @"-?\d+"))
+            {
+                sum += int.Parse(match.ToString());
+            }
+
+            return sum;
+        }
+
+        // Problem 12:2
+        static int NotRed(string input)
+        {
+            string data = File.ReadAllText(input);
+            var ptr = 0;
+
+            while (ptr < data.Length - 2)
+            {
+                var check = data.Substring(ptr, 3);
+                if (check == "red")
+                {
+                    var start = FindBound(data, ptr, true);
+                    var end = start != -1 ? FindBound(data, ptr, false) : -1;
+
+                    // if it's an array
+                    if (start == -1)
+                    {
+                        // replace red with BLU
+                        data = data.Remove(ptr, 3).Insert(ptr, "BLU");
+                    }
+                    else
+                    {
+                        // remove this whole object and put the pointer back to the start
+                        data = data.Remove(start, (end - start) + 1);
+                        ptr = 0;
+                        continue;
+                    }
+                }
+                ptr++;
+            }
+
+            var sum = 0;
+            foreach (var match in Regex.Matches(data, @"-?\d+"))
+            {
+                sum += int.Parse(match.ToString());
+            }
+
+            return sum;
+        }
+
+        static int FindBound(string data, int ptr, bool backwards)
+        {
+            char[] brackets = new char[4] {']', '}', '[', '{'};
+
+            if (!backwards)
+            {
+                brackets[0] = '[';
+                brackets[1] = '{';
+                brackets[3] = '}';
+                brackets[2] = ']';
+            }
+
+            var curly = 0;
+            var square = 0;
+
+            while (curly <= 0 && square <= 0)
+            {
+                if (backwards) ptr--;
+                else ptr++;
+
+                char c = data[ptr];
+                if (c == brackets[0]) square--;
+                if (c == brackets[1]) curly--;
+                if (c == brackets[2]) square++;
+                if (c == brackets[3]) curly++;
+            }
+
+            if (square == 1) return -1;
+            else return ptr;
+        }
+
+        // Problem 19:1
+        static int Medicine(string path)
+        {
+            var info = File.ReadAllText(path).Split("\r\n\r\n");
+            var replacements = info[0].Split("\r\n").Select(x => x.Split(" => "));
+            var molecule = info[1];
+            var unique = new HashSet<string>();
+
+            // for each set of replacements
+            foreach (var pair in replacements)
+            {
+                var ptr = 0;
+                var key = pair[0];
+                var value = pair[1];
+                // move through the molecule and replace each occurrence of the key
+                while (ptr <= molecule.Length - key.Length)
+                {
+                    // if this section of the molecule matches the key, replace it
+                    if (molecule.Substring(ptr, key.Length) == key)
+                    {
+                        var replaced = molecule.Remove(ptr, key.Length).Insert(ptr, value);
+                        unique.Add(replaced);
+                    }
+                    // move the pointer
+                    ptr++;
+                }
+            }
+
+            foreach (var mol in unique)
+            {
+                Console.WriteLine(mol);
+            }
+
+            Console.WriteLine(unique.Count);
+
+            return 0;
+        }
+
 		static string LookAndSay(string input)
 		{
 			//Console.WriteLine(input);
@@ -434,7 +612,7 @@ namespace _2015
 			// {
 			// 	sb.Append(s.Length + "" + s[0]);
 			// }
-				
+
 			// return sb.ToString();
 
 			string result = "";
@@ -459,7 +637,7 @@ namespace _2015
 
 			return result;
 		}
-	
+
 		static int FindSue(string path)
 		{
 			var input = File.ReadAllLines(path);
@@ -472,7 +650,7 @@ namespace _2015
 				var items = new Dictionary<string, int>();
 
 				for (var i = 0; i < 6; i += 2)
-				{	
+				{
 					var item = words[i + 2].TrimEnd(':');
 					var amount = int.Parse(words[i + 3].TrimEnd(','));
 					items[item] = amount;
@@ -525,12 +703,7 @@ namespace _2015
 			Console.WriteLine(list.First());
 
 			return 0;
-		}	
-
-		// static string NewPassword(string input)
-		// {
-
-		// }
+		}
 
 		static bool HasStraight(string input)
 		{
@@ -546,10 +719,5 @@ namespace _2015
 		{
 			return !input.Any(x => x == 'i' || x == 'o' || x == 'l');
 		}
-
-		// static bool HasPairs(string input)
-		// {
-
-		// }
 	}
 }
